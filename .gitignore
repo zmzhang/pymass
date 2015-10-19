@@ -1,0 +1,9 @@
+thirdparty
+*.dll
+/python/*.pyc
+/python/*.mzXML
+*.mzXML
+*.xml
+*.lib
+*.pyc
+*.pyd
