@@ -24,13 +24,6 @@ float ReverseFloat(const float inFloat)
 	return retVal;
 }
 
-long GetFileSize(std::string filename)
-{
-	struct stat stat_buf;
-	int rc = stat(filename.c_str(), &stat_buf);
-	return rc == 0 ? stat_buf.st_size : -1;
-}
-
 
 void MZXML::InitHandlers() {
 	AddStartElementHandler("scan", [](MZXML& a) -> void {
@@ -43,17 +36,18 @@ void MZXML::InitHandlers() {
 		a.m_scanAttributes.pop_back();
 	});
 
-	AddEndElementHandler("peaks", [](MZXML& a) -> void {
-		a.setCurrentElement("");
+	AddStartElementHandler("peaks", [](MZXML& a) -> void {
+		a.setCurrentText("");
 	});
 
-	AddValueHandler("peaks", [](MZXML& a) -> void {
+	AddEndElementHandler("peaks", [](MZXML& a) -> void {
+
 		if (a.m_scanAttributes.size() == 1)
 		{
 			MassScan scan;
-			string str = a.text();
-			vector<BYTE> raw = base64_decode(a.text());
-			int nNum = raw.size() / (2*sizeof(float));
+			string str = a.getCurrentText();
+			vector<BYTE> raw = base64_decode(a.getCurrentText());
+			int nNum = raw.size() / (2 * sizeof(float));
 			float* floatArray = reinterpret_cast<float*>(raw.data());
 			scan.mz.resize(nNum);
 			scan.val.resize(nNum);
@@ -63,15 +57,19 @@ void MZXML::InitHandlers() {
 			size_t nLen = atts["retentionTime"].length();
 			scan.RT = stod(atts["retentionTime"].substr(2, nLen - 3));
 			scan.BIC = stod(atts["basePeakIntensity"]);
-			for (int i = 0; i < nNum;i++)
+			for (int i = 0; i < nNum; i++)
 			{
-				scan.mz[i] = ReverseFloat(floatArray[2*i]);
-				scan.val[i] = ReverseFloat(floatArray[2*i+1]);
+				scan.mz[i] = ReverseFloat(floatArray[2 * i]);
+				scan.val[i] = ReverseFloat(floatArray[2 * i + 1]);
 			}
 			scan.TIC = scan.val.sum();
 			a.m_LCMS.push_back(scan);
 		}
+
+		a.setCurrentText("");
 	});
+
+
 
 }
 
@@ -121,7 +119,8 @@ void MZXML::parseFile(const std::string& filename) {
 		if (fd == NULL) {
 			throw std::runtime_error("File does not exist");
 		}
-		const size_t BUFFER_SIZE = GetFileSize(filename);
+		//const size_t BUFFER_SIZE = GetFileSize(filename);
+		const size_t BUFFER_SIZE = 10*1024*1024;
 		for (;;) {
 			void *buffer = XML_GetBuffer(parser, BUFFER_SIZE);
 			if (buffer == NULL) {
@@ -154,8 +153,6 @@ void MZXML::parseFile(const std::string& filename) {
 	{
 		std::cout << "Exception: " << e.what() << "\n";
 	}
-
-
 }
 
 
@@ -173,7 +170,7 @@ void MZXML::AddValueHandler(string elementName, Handler call) {
 }
 
 
-string  MZXML::element() {
+string  MZXML::getCurrentElement() {
 	return currentElement_;
 }
 
@@ -182,11 +179,16 @@ void MZXML::setCurrentElement(string str)
 	currentElement_ = str;
 }
 
+void MZXML::setCurrentText(string str)
+{
+	currentText_ = str;
+}
+
 map<string, string> MZXML::attributes() {
 	return currentAttributes_;
 }
 
-string MZXML::text() {
+string MZXML::getCurrentText() {
 	return currentText_;
 }
 
@@ -246,7 +248,7 @@ void MZXML::characterDataHandler(void *data, char const *d, int len) {
 	
 
 	MZXML* e = static_cast<MZXML *>(data);
-	e->currentText_ = std::string(d, len);
+	e->currentText_ += std::string(d, len);
 	if (e->valueHandlers.find(e->currentElement_) != e->valueHandlers.end()) {
 		e->valueHandlers.find(e->currentElement_)->second(*e);
 	}

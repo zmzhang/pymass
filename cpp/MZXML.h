@@ -50,10 +50,11 @@ public:
 	void AddStartElementHandler(string elementName, Handler call);
 	void AddEndElementHandler(string elementName, Handler call);
 	void AddValueHandler(string elementName, Handler call);
-	string element();
+	string getCurrentElement();
 	void setCurrentElement(string str);
+	void setCurrentText(string str);
 	map<string, string> attributes();
-	string text();
+	string getCurrentText();
 
 
 	LCMS m_LCMS;

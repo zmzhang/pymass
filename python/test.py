@@ -20,8 +20,8 @@ mz1.parseFile(mzfile.encode('mbcs'))
 rt=mz1.getRT()
 bic=mz1.getBIC()
 tic=mz1.getTIC()
-#plot(rt,bic)
-plot(rt,tic)
+plot(rt,bic,'r')
+plot(rt,tic,'g')
 show()
 
 #
