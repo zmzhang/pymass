@@ -6,7 +6,7 @@ Created on Thu Oct 08 23:27:50 2015
 """
 import _pymass
 from _pymass import MZXML
-from matplotlib.pylab import plot, show
+from matplotlib.pylab import plot, show, figure
 #_pymass.testMZXML()
 
 
@@ -22,12 +22,13 @@ bic=mz1.getBIC()
 tic=mz1.getTIC()
 plot(rt,bic,'r')
 plot(rt,tic,'g')
-show()
 
-#
-#mz=mz1.getMS(0)
-#val=mz1.getVal(0)
-#
-#plot(mz,val)
-#show(0)
+
+
+mz=mz1.getMS(0)
+val=mz1.getVal(0)
+
+figure()
+plot(mz,val)
+show()
 
