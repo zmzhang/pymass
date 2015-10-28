@@ -38,17 +38,27 @@ void MZXML::InitHandlers() {
 
 	AddStartElementHandler("peaks", [](MZXML& a) -> void {
 		a.setCurrentText("");
+		if (a.m_scanAttributes.size() == 1)
+		{
+			MassScan scan;
+			a.m_LCMS.push_back(scan);
+		}
+		if (a.m_scanAttributes.size() == 2)
+		{
+			a.m_LCMS.m_massScans.back().childs.push_back(make_shared<MassScan>());
+		}
 	});
 
 	AddEndElementHandler("peaks", [](MZXML& a) -> void {
 
 		if (a.m_scanAttributes.size() == 1)
 		{
-			MassScan scan;
+			
 			string str = a.getCurrentText();
 			vector<BYTE> raw = base64_decode(a.getCurrentText());
 			int nNum = raw.size() / (2 * sizeof(float));
 			float* floatArray = reinterpret_cast<float*>(raw.data());
+			MassScan& scan = a.m_LCMS.m_massScans.back();
 			scan.mz.resize(nNum);
 			scan.val.resize(nNum);
 			scan.precursor_mz = -1;
@@ -63,7 +73,31 @@ void MZXML::InitHandlers() {
 				scan.val[i] = ReverseFloat(floatArray[2 * i + 1]);
 			}
 			scan.TIC = scan.val.sum();
-			a.m_LCMS.push_back(scan);
+		}
+
+		if (a.m_scanAttributes.size() == 2)
+		{
+
+			string str = a.getCurrentText();
+			vector<BYTE> raw = base64_decode(a.getCurrentText());
+			int nNum = raw.size() / (2 * sizeof(float));
+			float* floatArray = reinterpret_cast<float*>(raw.data());
+			shared_ptr<MassScan> pscan = a.m_LCMS.m_massScans.back().childs.back();
+			pscan->mz.resize(nNum);
+			pscan->val.resize(nNum);
+			
+
+			map<string, string> atts = a.m_scanAttributes.back();
+			size_t nLen = atts["retentionTime"].length();
+			pscan->RT = stod(atts["retentionTime"].substr(2, nLen - 3));
+			pscan->BIC = stod(atts["basePeakIntensity"]);
+			pscan->precursor_mz = stod(atts["basePeakMz"]);;
+			for (int i = 0; i < nNum; i++)
+			{
+				pscan->mz[i] = ReverseFloat(floatArray[2 * i]);
+				pscan->val[i] = ReverseFloat(floatArray[2 * i + 1]);
+			}
+			pscan->TIC = pscan->val.sum();
 		}
 
 		a.setCurrentText("");
@@ -119,7 +153,6 @@ void MZXML::parseFile(const std::string& filename) {
 		if (fd == NULL) {
 			throw std::runtime_error("File does not exist");
 		}
-		//const size_t BUFFER_SIZE = GetFileSize(filename);
 		const size_t BUFFER_SIZE = 10*1024*1024;
 		for (;;) {
 			void *buffer = XML_GetBuffer(parser, BUFFER_SIZE);
@@ -188,7 +221,7 @@ map<string, string> MZXML::attributes() {
 	return currentAttributes_;
 }
 
-string MZXML::getCurrentText() {
+const string& MZXML::getCurrentText() {
 	return currentText_;
 }
 
@@ -209,16 +242,32 @@ Eigen::VectorXd MZXML::getTIC()
 }
 
 
-Eigen::VectorXd MZXML::getMS(int i)
+Eigen::VectorXd MZXML::getMS(int i, int level)
 {
-	return m_LCMS.m_massScans[i].mz;
+	if (level == 1)
+	{
+		return m_LCMS.m_massScans[i].mz;
+	}
+	else if (level==2)
+	{
+		return m_LCMS.m_massScans[i].childs[0]->mz;
+	}
+	return Eigen::VectorXd(0, 0);
 }
 
 
 
-Eigen::VectorXd MZXML::getVal(int i)
+Eigen::VectorXd MZXML::getVal(int i, int level)
 {
-	return m_LCMS.m_massScans[i].val;
+	if (level==1)
+	{
+		return m_LCMS.m_massScans[i].val;
+	}
+	else if (level == 2)
+	{
+		return m_LCMS.m_massScans[i].childs[0]->val;
+	}
+	return Eigen::VectorXd(0,0);
 }
 
 void MZXML::startElement(void *data, const char *name, const char **atts) {
@@ -254,10 +303,3 @@ void MZXML::characterDataHandler(void *data, char const *d, int len) {
 	}
 }
       
-void testMZXML() {
-
-	MZXML e;
-	e.parseFile("D:/workspace/pymass/python/标2-方法5-正负离子_Seg1Ev1.mzXML");
-	cout << "hello" << endl;
-}
-

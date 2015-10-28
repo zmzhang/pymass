@@ -54,7 +54,7 @@ public:
 	void setCurrentElement(string str);
 	void setCurrentText(string str);
 	map<string, string> attributes();
-	string getCurrentText();
+	const string& getCurrentText();
 
 
 	LCMS m_LCMS;
@@ -68,8 +68,8 @@ public:
 	Eigen::VectorXd getBIC();
 	Eigen::VectorXd getRT();
 	Eigen::VectorXd getTIC();
-	Eigen::VectorXd getMS(int i);
-	Eigen::VectorXd getVal(int i);
+	Eigen::VectorXd getMS(int i, int level=1);
+	Eigen::VectorXd getVal(int i, int level=1);
 
 private:
 	XML_Parser parser;
@@ -84,7 +84,5 @@ private:
 	string currentText_;
 };
 
-
-void PYMASS_EXPORT testMZXML();
 
 

@@ -23,8 +23,7 @@ Eigen::VectorXi searchsorted(const Eigen::VectorXf& v, const Eigen::VectorXf& t)
 
 Eigen::VectorXi findclosest(const Eigen::VectorXf& v, const Eigen::VectorXf& t)
 {
-	if (v.size()==0) return VectorXi::Zero(0);
-	if (v.size()==1) return VectorXi::Zero(t.size());
+	if (v.size()==1 || v.size() == 0) return VectorXi::Zero(t.size());
 	VectorXi idx = searchsorted(v,t);
 	clip(idx,1, static_cast<int>(v.size()-1));
 	Eigen::VectorXf right=slice(v,idx);
