@@ -4,6 +4,7 @@
 // Pull in the headers from Python itself and from our library
 %{
 #define SWIG_FILE_WITH_INIT
+#define SWIG_PYTHON_STRICT_BYTE_CHAR
 #include <Python.h>
 #include "pymass_export.h"
 #include "MZXML.h"
