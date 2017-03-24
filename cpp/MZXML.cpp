@@ -107,7 +107,13 @@ void MZXML::InitHandlers() {
 
 }
 
-MZXML::MZXML() {
+
+void MZXML::initParser()
+{
+	if (parser)
+	{
+		XML_ParserFree(parser);
+	}
 	parser = XML_ParserCreate(NULL);
 	if (!parser) {
 		throw std::bad_alloc();
@@ -122,11 +128,18 @@ MZXML::MZXML() {
 	XML_SetCharacterDataHandler(parser, &MZXML::characterDataHandler);
 
 	InitHandlers();
+}
 
+
+MZXML::MZXML() {
+	parser = NULL;
 }
 
 MZXML::~MZXML() {
-	XML_ParserFree(parser);
+	if (parser)
+	{
+		XML_ParserFree(parser);
+	}
 }
 
 long MZXML::line() {
@@ -142,19 +155,28 @@ void MZXML::parseString(string s) {
 	XML_Parse(parser, s.c_str(), len, 1);
 }
 
+#include <boost/progress.hpp>
+
 void MZXML::parseFile(const std::string& filename) {
 	
-	
+	initParser();
 	try
 	{
 		FILE* fd = fopen(filename.c_str(), "r");
+
+		fseek(fd, 0L, SEEK_END);
+		long sz = ftell(fd); rewind(fd);
+
 		//cout << "filename: " << filename.c_str() << endl;
 		//cout << "fd: " << fd << endl;
 		if (fd == NULL) {
 			throw std::runtime_error("File does not exist");
 		}
-		const size_t BUFFER_SIZE = 10*1024*1024;
+		const size_t BUFFER_SIZE = 1*1024*1024;
+		int i = 0;
+		boost::progress_display show_progress(sz);
 		for (;;) {
+			show_progress+= BUFFER_SIZE;
 			void *buffer = XML_GetBuffer(parser, BUFFER_SIZE);
 			if (buffer == NULL) {
 				throw std::runtime_error("out of memory");
@@ -172,6 +194,7 @@ void MZXML::parseFile(const std::string& filename) {
 			if (bytes_read == 0) {
 				break;
 			}
+			i++;
 		}
 		fclose(fd);
 
@@ -180,6 +203,7 @@ void MZXML::parseFile(const std::string& filename) {
 			m_vecTIC.push_back(i.TIC);
 			m_vecRT.push_back(i.RT);
 		}
+		cout << endl;
 
 	}
 	catch (std::exception const& e)

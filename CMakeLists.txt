@@ -5,7 +5,9 @@ project(pymass)
 # set module path for eigen, numpy
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
-set(CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/eigen-325;${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/expat-2.1.0)
+set(CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/eigen-325)
+set(CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/expat-2.1.0)
+set(CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/boost_1_63_0)
 
 # find eigen library
 find_package( Eigen3 )
@@ -23,6 +25,19 @@ if (EXPAT_FOUND)
 else()
   message(FATAL_ERROR "Could not find expat, which is a required depedency")
 endif()
+
+
+# find boost
+set(Boost_USE_STATIC_LIBS OFF) 
+set(Boost_USE_MULTITHREADED ON)  
+set(Boost_USE_STATIC_RUNTIME OFF) 
+find_package(Boost) 
+if(Boost_FOUND)
+    include_directories(${Boost_INCLUDE_DIRS}) 
+else()
+  message(FATAL_ERROR "Could not find BOOST, which is a required depedency")
+endif()
+
 
 
 add_definitions(-DUNICODE -D_UNICODE -D_CRT_SECURE_NO_DEPRECATE)

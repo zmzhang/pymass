@@ -8,10 +8,13 @@ using namespace Eigen;
 
 void testMZXML() {
 
-	MZXML e;
-	e.parseFile("D:/workspace/pymass/python/标2-方法5-正负离子_Seg1Ev1.mzXML");
-	cout << e.getMS(3, 2).transpose() << endl;
-	cout << e.getVal(3, 2).transpose() << endl;
+	for (int i = 0; i < 10; i++)
+	{
+		MZXML e;
+		e.parseFile("D:/workspace/pymass/python/标2-方法5-正负离子_Seg1Ev1.mzXML");
+		cout << e.getMS(3, 2).transpose() << endl;
+		cout << e.getVal(3, 2).transpose() << endl;
+	}
 }
 
 void testFindClosest()

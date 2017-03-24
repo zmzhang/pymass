@@ -41,6 +41,7 @@ class PYMASS_EXPORT MZXML {
 public:
 	typedef function< void(MZXML& a) > Handler;
 	void InitHandlers();
+	void initParser();
 	MZXML();
 	~MZXML();
 	long line();
