@@ -158,20 +158,19 @@ void MZXML::parseString(string s) {
 #include <boost/progress.hpp>
 
 void MZXML::parseFile(const std::string& filename) {
-	
+	cout << "Parsing " + filename << endl;
 	initParser();
 	try
 	{
 		FILE* fd = fopen(filename.c_str(), "r");
 
+		if (fd == NULL) {
+			throw std::runtime_error("file doesn't exist");
+		}
+
 		fseek(fd, 0L, SEEK_END);
 		long sz = ftell(fd); rewind(fd);
 
-		//cout << "filename: " << filename.c_str() << endl;
-		//cout << "fd: " << fd << endl;
-		if (fd == NULL) {
-			throw std::runtime_error("File does not exist");
-		}
 		const size_t BUFFER_SIZE = 1*1024*1024;
 		int i = 0;
 		boost::progress_display show_progress(sz);
