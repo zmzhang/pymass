@@ -8,6 +8,7 @@
 #include <Python.h>
 #include "pymass_export.h"
 #include "MZXML.h"
+#include "utils.h"
 %}
 
 %include <typemaps.i>
@@ -35,4 +36,5 @@ namespace std {
 // Tell swig to build bindings for everything in our library
 %include "pymass_export.h"
 %include "MZXML.h"
+%include "utils.h"
 

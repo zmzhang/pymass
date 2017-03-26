@@ -5,6 +5,7 @@
 #include <iostream>    
 #include <algorithm>    
 #include <vector> 
+#include "pymass_export.h"
 
 template <typename T>
 T slice(const T& full, const Eigen::VectorXi & ind)
@@ -18,8 +19,10 @@ T slice(const T& full, const Eigen::VectorXi & ind)
     return target;
 }
 
-void clip(Eigen::VectorXi & idx, int s, int e);
-Eigen::VectorXi searchsorted(const Eigen::VectorXf& v, const Eigen::VectorXf& t);
-Eigen::VectorXi findclosest(const Eigen::VectorXf& v, const Eigen::VectorXf& t);
+void PYMASS_EXPORT clip(Eigen::VectorXi & idx, int s, int e);
+Eigen::VectorXi PYMASS_EXPORT searchsorted(const Eigen::VectorXf& v, const Eigen::VectorXf& t);
+Eigen::VectorXi PYMASS_EXPORT findclosest(const Eigen::VectorXf& v, const Eigen::VectorXf& t);
+
+void PYMASS_EXPORT finishProcess();
 
 #endif

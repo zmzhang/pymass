@@ -1,4 +1,6 @@
 #include "utils.h"
+#include <chrono>
+#include <thread>
 
 using namespace std;
 using namespace Eigen; 
@@ -30,4 +32,10 @@ Eigen::VectorXi findclosest(const Eigen::VectorXf& v, const Eigen::VectorXf& t)
 	Eigen::VectorXf left=slice(v,(idx.array()-1));
 	idx.array()-=(t.array() - left.array() < right.array() - t.array()).select(1,VectorXi::Zero(t.size())).array();
 	return idx;
-} 
+}
+
+void finishProcess()
+{
+	cout << "finish Process"<<endl;
+	std::this_thread::sleep_for(std::chrono::milliseconds(10));
+}
