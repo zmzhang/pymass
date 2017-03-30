@@ -22,7 +22,7 @@ T slice(const T& full, const Eigen::VectorXi & ind)
 void PYMASS_EXPORT clip(Eigen::VectorXi & idx, int s, int e);
 Eigen::VectorXi PYMASS_EXPORT searchsorted(const Eigen::VectorXf& v, const Eigen::VectorXf& t);
 Eigen::VectorXi PYMASS_EXPORT findclosest(const Eigen::VectorXf& v, const Eigen::VectorXf& t);
-
+float PYMASS_EXPORT ReverseFloat(const float inFloat);
 void PYMASS_EXPORT finishProcess();
 
 #endif

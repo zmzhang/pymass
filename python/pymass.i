@@ -7,7 +7,8 @@
 #define SWIG_PYTHON_STRICT_BYTE_CHAR
 #include <Python.h>
 #include "pymass_export.h"
-#include "MZXML.h"
+#include "LCMS.h"
+#include "mzXMLParser.h"
 #include "utils.h"
 %}
 
@@ -21,6 +22,7 @@ namespace std {
    %template(DoubleVector) vector<double>;
    %template(StringVector) vector<string>;
    %template(ConstCharVector) vector<const char*>;
+   %template(MassScanVector) vector<MassScan>;
 }
 
 
@@ -32,9 +34,10 @@ namespace std {
 
 
 
-%include <windows.i>
 // Tell swig to build bindings for everything in our library
+%include <windows.i>
 %include "pymass_export.h"
-%include "MZXML.h"
+%include "LCMS.h"
+%include "mzXMLParser.h"
 %include "utils.h"
 

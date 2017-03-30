@@ -1,42 +1,23 @@
 #pragma once
 
-#include <iostream>
-#include <map>
-#include <functional>
-#include <string>
-#include "MZXML.h"
 #include "base64.h"
+#include "utils.h"
+#include "mzXMLParser.h"
 
 using namespace std;
 
-float ReverseFloat(const float inFloat)
-{
-	float retVal;
-	char *floatToConvert = (char*)& inFloat;
-	char *returnFloat = (char*)& retVal;
-
-	// swap the bytes into a temporary buffer
-	returnFloat[0] = floatToConvert[3];
-	returnFloat[1] = floatToConvert[2];
-	returnFloat[2] = floatToConvert[1];
-	returnFloat[3] = floatToConvert[0];
-
-	return retVal;
-}
-
-
-void MZXML::InitHandlers() {
-	AddStartElementHandler("scan", [](MZXML& a) -> void {
+void mzXMLParser::InitHandlers() {
+	AddStartElementHandler("scan", [](mzXMLParser& a) -> void {
 		map<string, string> atts = a.attributes();
 		a.m_scanAttributes.push_back(atts);
 
 	});
 
-	AddEndElementHandler("scan", [](MZXML& a) -> void {
+	AddEndElementHandler("scan", [](mzXMLParser& a) -> void {
 		a.m_scanAttributes.pop_back();
 	});
 
-	AddStartElementHandler("peaks", [](MZXML& a) -> void {
+	AddStartElementHandler("peaks", [](mzXMLParser& a) -> void {
 		a.setCurrentText("");
 		if (a.m_scanAttributes.size() == 1)
 		{
@@ -49,7 +30,7 @@ void MZXML::InitHandlers() {
 		}
 	});
 
-	AddEndElementHandler("peaks", [](MZXML& a) -> void {
+	AddEndElementHandler("peaks", [](mzXMLParser& a) -> void {
 
 		if (a.m_scanAttributes.size() == 1)
 		{
@@ -108,7 +89,7 @@ void MZXML::InitHandlers() {
 }
 
 
-void MZXML::initParser()
+void mzXMLParser::initParser()
 {
 	if (parser)
 	{
@@ -123,43 +104,44 @@ void MZXML::initParser()
 	XML_SetUserData(parser, this);
 
 	// callbacks for the elements handlers
-	XML_SetElementHandler(parser, &MZXML::startElement, &MZXML::endElement);
+	XML_SetElementHandler(parser, &mzXMLParser::startElement, &mzXMLParser::endElement);
 
-	XML_SetCharacterDataHandler(parser, &MZXML::characterDataHandler);
+	XML_SetCharacterDataHandler(parser, &mzXMLParser::characterDataHandler);
 
 	InitHandlers();
 }
 
 
-MZXML::MZXML() {
+mzXMLParser::mzXMLParser() {
 	parser = NULL;
 }
 
-MZXML::~MZXML() {
+mzXMLParser::~mzXMLParser() {
 	if (parser)
 	{
 		XML_ParserFree(parser);
 	}
 }
 
-long MZXML::line() {
+long mzXMLParser::line() {
 	return XML_GetCurrentLineNumber(parser);
 }
 
-long MZXML::column() {
+long mzXMLParser::column() {
 	return XML_GetCurrentColumnNumber(parser);
 }
 
-void MZXML::parseString(string s) {
+void mzXMLParser::parseString(string s) {
 	int len = static_cast<int>(strlen(s.c_str()));
 	XML_Parse(parser, s.c_str(), len, 1);
 }
 
 #include <boost/progress.hpp>
 
-void MZXML::parseFile(const std::string& filename) {
+LCMS mzXMLParser::parseFile(const std::string& filename) {
 	cout << "Parsing " + filename << endl;
 	initParser();
+	m_LCMS = LCMS();
 	try
 	{
 		FILE* fd = fopen(filename.c_str(), "r");
@@ -198,9 +180,9 @@ void MZXML::parseFile(const std::string& filename) {
 		fclose(fd);
 
 		for (auto &i : m_LCMS.m_massScans) {
-			m_vecBIC.push_back(i.BIC);
-			m_vecTIC.push_back(i.TIC);
-			m_vecRT.push_back(i.RT);
+			m_LCMS.m_vecBIC.push_back(i.BIC);
+			m_LCMS.m_vecTIC.push_back(i.TIC);
+			m_LCMS.m_vecRT.push_back(i.RT);
 		}
 		cout << endl;
 
@@ -209,99 +191,49 @@ void MZXML::parseFile(const std::string& filename) {
 	{
 		std::cout << "Exception: " << e.what() << "\n";
 	}
+	return m_LCMS;
 }
 
 
 
-void MZXML::AddStartElementHandler(string elementName, Handler call) {
+void mzXMLParser::AddStartElementHandler(string elementName, Handler call) {
 	startElementHandlers[elementName] = call;
 }
 
-void MZXML::AddEndElementHandler(string elementName, Handler call) {
+void mzXMLParser::AddEndElementHandler(string elementName, Handler call) {
 	endElementHandlers[elementName] = call;
 }
 
-void MZXML::AddValueHandler(string elementName, Handler call) {
+void mzXMLParser::AddValueHandler(string elementName, Handler call) {
 	valueHandlers[elementName] = call;
 }
 
 
-string  MZXML::getCurrentElement() {
+string  mzXMLParser::getCurrentElement() {
 	return currentElement_;
 }
 
-void MZXML::setCurrentElement(string str)
+void mzXMLParser::setCurrentElement(string str)
 {
 	currentElement_ = str;
 }
 
-void MZXML::setCurrentText(string str)
+void mzXMLParser::setCurrentText(string str)
 {
 	currentText_ = str;
 }
 
-map<string, string> MZXML::attributes() {
+map<string, string> mzXMLParser::attributes() {
 	return currentAttributes_;
 }
 
-const string& MZXML::getCurrentText() {
+const string& mzXMLParser::getCurrentText() {
 	return currentText_;
 }
 
+void mzXMLParser::startElement(void *data, const char *name, const char **atts) {
 
-Eigen::VectorXd MZXML::getBIC()
-{
-	return Eigen::VectorXd::Map(m_vecBIC.data(),m_vecBIC.size());
-}
-
-Eigen::VectorXd MZXML::getRT()
-{
-	return Eigen::VectorXd::Map(m_vecRT.data(), m_vecRT.size());
-}
-
-Eigen::VectorXd MZXML::getTIC()
-{
-	return Eigen::VectorXd::Map(m_vecTIC.data(), m_vecTIC.size());
-}
-
-
-Eigen::VectorXd MZXML::getMS(int i, int level)
-{
-	if (level == 1)
-	{
-		return m_LCMS.m_massScans[i].mz;
-	}
-	else if (level==2)
-	{
-		return m_LCMS.m_massScans[i].childs[0]->mz;
-	}
-	return Eigen::VectorXd(0, 0);
-}
-
-
-
-Eigen::VectorXd MZXML::getVal(int i, int level)
-{
-	if (level==1)
-	{
-		return m_LCMS.m_massScans[i].val;
-	}
-	else if (level == 2)
-	{
-		return m_LCMS.m_massScans[i].childs[0]->val;
-	}
-	return Eigen::VectorXd(0,0);
-}
-
-Eigen::MatrixXd MZXML::getRegion(double rt_begin, double rt_end, double mz_begin, double mz_end)
-{
-	Eigen::MatrixXd ret;
-	return ret;
-}
-
-void MZXML::startElement(void *data, const char *name, const char **atts) {
-
-	MZXML* e = static_cast<MZXML *>(data);
+	mzXMLParser* e = static_cast<mzXMLParser *>(data);
 
 	e->currentElement_ = name;
 
@@ -314,18 +246,18 @@ void MZXML::startElement(void *data, const char *name, const char **atts) {
 	}
 }
 
-void MZXML::endElement(void *data, const char *name) {
+void mzXMLParser::endElement(void *data, const char *name) {
 
-	MZXML* e = static_cast<MZXML *>(data);
+	mzXMLParser* e = static_cast<mzXMLParser *>(data);
 	if (e->endElementHandlers.find(name) != e->endElementHandlers.end()) {
 		e->endElementHandlers.find(name)->second(*e);
 	}
 }
 
-void MZXML::characterDataHandler(void *data, char const *d, int len) {
+void mzXMLParser::characterDataHandler(void *data, char const *d, int len) {
 	
 
-	MZXML* e = static_cast<MZXML *>(data);
+	mzXMLParser* e = static_cast<mzXMLParser *>(data);
 	e->currentText_ += std::string(d, len);
 	if (e->valueHandlers.find(e->currentElement_) != e->valueHandlers.end()) {
 		e->valueHandlers.find(e->currentElement_)->second(*e);

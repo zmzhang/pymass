@@ -1,6 +1,6 @@
 #include <iostream>
 #include <fstream>
-#include "MZXML.h"
+#include "mzXMLParser.h"
 #include "utils.h"
 
 using namespace std;
@@ -10,10 +10,10 @@ void testMZXML() {
 
 	for (int i = 0; i < 10; i++)
 	{
-		MZXML e;
-		e.parseFile("D:/workspace/pymass/python/标2-方法5-正负离子_Seg1Ev1.mzXML");
-		cout << e.getMS(3, 2).transpose() << endl;
-		cout << e.getVal(3, 2).transpose() << endl;
+		mzXMLParser e;
+		LCMS lcms = e.parseFile("D:/workspace/pymass/python/标2-方法5-正负离子_Seg1Ev1.mzXML");
+		cout << lcms.getMS(3, 2).transpose() << endl;
+		cout << lcms.getVal(3, 2).transpose() << endl;
 	}
 }
 
