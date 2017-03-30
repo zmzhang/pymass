@@ -12,7 +12,6 @@
 using namespace std;
 
 
-
 struct PYMASS_EXPORT MassScan
 {
 public:
@@ -71,6 +70,8 @@ public:
 	Eigen::VectorXd getTIC();
 	Eigen::VectorXd getMS(int i, int level=1);
 	Eigen::VectorXd getVal(int i, int level=1);
+
+	Eigen::MatrixXd getRegion(double rt_begin, double rt_end, double mz_begin, double mz_end);
 
 private:
 	XML_Parser parser;

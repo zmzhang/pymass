@@ -12,7 +12,7 @@ set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}  "../thirdparty/boost")
 # find eigen library
 find_package( Eigen3 )
 if (EIGEN3_FOUND)
-  include_directories( ${EIGEN3_INCLUDE_DIR} )
+  include_directories(${EIGEN3_INCLUDE_DIR} )
 else()
   message(FATAL_ERROR "Could not find eigen, which is a required depedency")
 endif()
@@ -40,7 +40,7 @@ endif()
 
 
 
-add_definitions(-DUNICODE -D_UNICODE -D_CRT_SECURE_NO_DEPRECATE)
+add_definitions(-DUNICODE -D_UNICODE -D_CRT_SECURE_NO_DEPRECATE /wd4251 /wd4819)
 
 
 add_subdirectory(cpp)

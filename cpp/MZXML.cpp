@@ -56,7 +56,7 @@ void MZXML::InitHandlers() {
 			
 			string str = a.getCurrentText();
 			vector<BYTE> raw = base64_decode(a.getCurrentText());
-			int nNum = raw.size() / (2 * sizeof(float));
+			size_t nNum = raw.size() / (2 * sizeof(float));
 			float* floatArray = reinterpret_cast<float*>(raw.data());
 			MassScan& scan = a.m_LCMS.m_massScans.back();
 			scan.mz.resize(nNum);
@@ -80,7 +80,7 @@ void MZXML::InitHandlers() {
 
 			string str = a.getCurrentText();
 			vector<BYTE> raw = base64_decode(a.getCurrentText());
-			int nNum = raw.size() / (2 * sizeof(float));
+			size_t nNum = raw.size() / (2 * sizeof(float));
 			float* floatArray = reinterpret_cast<float*>(raw.data());
 			shared_ptr<MassScan> pscan = a.m_LCMS.m_massScans.back().childs.back();
 			pscan->mz.resize(nNum);
@@ -291,6 +291,12 @@ Eigen::VectorXd MZXML::getVal(int i, int level)
 		return m_LCMS.m_massScans[i].childs[0]->val;
 	}
 	return Eigen::VectorXd(0,0);
+}
+
+Eigen::MatrixXd MZXML::getRegion(double rt_begin, double rt_end, double mz_begin, double mz_end)
+{
+	Eigen::MatrixXd ret;
+	return ret;
 }
 
 void MZXML::startElement(void *data, const char *name, const char **atts) {

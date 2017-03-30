@@ -1,6 +1,8 @@
 # Configure and build our SWIG-based python wrapper.
-
 # We defined a helper function in swigmake/cmake/SwigPython.cmake
+
+add_definitions(/wd4267 /wd4244)
+
 include(SwigPython)
 add_swig_python_module(TARGET pymass
                        CPLUSPLUS

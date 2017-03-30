@@ -24,6 +24,7 @@ void testFindClosest()
 	VectorXf t(3);
 	t << 1.1, 6.5, 9.5;
 
+
 	cout << searchsorted(v, t) << endl;
 	cout << "##########" << endl;
 	cout << findclosest(v, t) << endl;
