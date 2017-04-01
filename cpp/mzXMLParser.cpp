@@ -50,7 +50,10 @@ void mzXMLParser::InitHandlers() {
 			map<string, string> atts = a.m_scanAttributes.back();
 			size_t nLen = atts["retentionTime"].length();
 			scan.RT = stod(atts["retentionTime"].substr(2, nLen - 3));
-			scan.BIC = stod(atts["basePeakIntensity"]);
+			if (atts.find("basePeakIntensity")!=atts.end())
+			{
+				scan.BIC = stod(atts["basePeakIntensity"]);
+			}			
 			for (int i = 0; i < nNum; i++)
 			{
 				scan.mz[i] = ReverseFloat(floatArray[2 * i]);
@@ -79,7 +82,10 @@ void mzXMLParser::InitHandlers() {
 			map<string, string> atts = a.m_scanAttributes.back();
 			size_t nLen = atts["retentionTime"].length();
 			pscan->RT = stod(atts["retentionTime"].substr(2, nLen - 3));
-			pscan->BIC = stod(atts["basePeakIntensity"]);
+			if (atts.find("basePeakIntensity") != atts.end())
+			{
+				pscan->BIC = stod(atts["basePeakIntensity"]);
+			}
 			pscan->precursor_mz = stod(atts["basePeakMz"]);;
 			for (int i = 0; i < nNum; i++)
 			{

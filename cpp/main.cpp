@@ -11,7 +11,8 @@ void testMZXML() {
 	for (int i = 0; i < 1; i++)
 	{
 		mzXMLParser e;
-		LCMS lcms = e.parseFile("D:/workspace/pymass/python/标2-方法5-正负离子_Seg1Ev1.mzXML");
+		//LCMS lcms = e.parseFile("D:/workspace/pymass/python/标2-方法5-正负离子_Seg1Ev1.mzXML");
+		LCMS lcms = e.parseFile("D:/workspace/pymass/python/detnoise_sigma3_PICKED.mzXML");
 		//cout << lcms.getMS(3, 2).transpose() << endl;
 		//cout << lcms.getVal(3, 2).transpose() << endl;
 	}
