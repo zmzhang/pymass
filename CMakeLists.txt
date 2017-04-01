@@ -38,6 +38,12 @@ else()
   message(FATAL_ERROR "Could not find BOOST, which is a required depedency")
 endif()
 
+# find base64SIMD
+get_filename_component(BASE64_ABS_PATH "../thirdparty/base64SIMD" ABSOLUTE)
+include_directories("${BASE64_ABS_PATH}/include")
+link_directories("${BASE64_ABS_PATH}/lib")
+
+
 
 
 add_definitions(-DUNICODE -D_UNICODE -D_CRT_SECURE_NO_DEPRECATE /wd4251 /wd4819)
@@ -45,4 +51,3 @@ add_definitions(-DUNICODE -D_UNICODE -D_CRT_SECURE_NO_DEPRECATE /wd4251 /wd4819)
 
 add_subdirectory(cpp)
 add_subdirectory(python)
-#target_link_libraries(${PROJECT_NAME} ${EXPAT_LIBRARIES})

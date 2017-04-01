@@ -1,8 +1,10 @@
 #pragma once
 
-#include "base64.h"
+//#include "base64.h"
 #include "utils.h"
 #include "mzXMLParser.h"
+
+#include <libbase64.h>
 
 using namespace std;
 
@@ -29,16 +31,17 @@ void mzXMLParser::InitHandlers() {
 			a.m_LCMS.m_massScans.back().childs.push_back(make_shared<MassScan>());
 		}
 	});
-
+	
 	AddEndElementHandler("peaks", [](mzXMLParser& a) -> void {
 
 		if (a.m_scanAttributes.size() == 1)
 		{
-			
 			string str = a.getCurrentText();
-			vector<BYTE> raw = base64_decode(a.getCurrentText());
-			size_t nNum = raw.size() / (2 * sizeof(float));
-			float* floatArray = reinterpret_cast<float*>(raw.data());
+			char * raw = new char[str.size()];
+			size_t outlen;
+			base64_decode(str.data(), str.size(), raw, &outlen, BASE64_FORCE_AVX2);
+			size_t nNum = outlen / (2 * sizeof(float));
+			float* floatArray = reinterpret_cast<float*>(raw);
 			MassScan& scan = a.m_LCMS.m_massScans.back();
 			scan.mz.resize(nNum);
 			scan.val.resize(nNum);
@@ -54,19 +57,24 @@ void mzXMLParser::InitHandlers() {
 				scan.val[i] = ReverseFloat(floatArray[2 * i + 1]);
 			}
 			scan.TIC = scan.val.sum();
+			delete[] raw;
 		}
+
 
 		if (a.m_scanAttributes.size() == 2)
 		{
 
 			string str = a.getCurrentText();
-			vector<BYTE> raw = base64_decode(a.getCurrentText());
-			size_t nNum = raw.size() / (2 * sizeof(float));
-			float* floatArray = reinterpret_cast<float*>(raw.data());
+			char * raw = new char[str.size()];
+			size_t outlen;
+			base64_decode(str.data(), str.size(), raw, &outlen, BASE64_FORCE_AVX2);
+			size_t nNum = outlen / (2 * sizeof(float));
+			float* floatArray = reinterpret_cast<float*>(raw);
+
 			shared_ptr<MassScan> pscan = a.m_LCMS.m_massScans.back().childs.back();
 			pscan->mz.resize(nNum);
 			pscan->val.resize(nNum);
-			
+
 
 			map<string, string> atts = a.m_scanAttributes.back();
 			size_t nLen = atts["retentionTime"].length();
@@ -79,12 +87,13 @@ void mzXMLParser::InitHandlers() {
 				pscan->val[i] = ReverseFloat(floatArray[2 * i + 1]);
 			}
 			pscan->TIC = pscan->val.sum();
+			delete[] raw;
 		}
 
 		a.setCurrentText("");
 	});
 
-
+	
 
 }
 
