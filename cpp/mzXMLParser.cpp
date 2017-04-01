@@ -162,11 +162,9 @@ LCMS mzXMLParser::parseFile(const std::string& filename) {
 		fseek(fd, 0L, SEEK_END);
 		long sz = ftell(fd); rewind(fd);
 
-		const size_t BUFFER_SIZE = 1*1024*1024;
-		int i = 0;
+		const size_t BUFFER_SIZE = std::min(long(50*1024*1024), sz/50);
 		boost::progress_display show_progress(sz);
 		for (;;) {
-			show_progress+= BUFFER_SIZE;
 			void *buffer = XML_GetBuffer(parser, BUFFER_SIZE);
 			if (buffer == NULL) {
 				throw std::runtime_error("out of memory");
@@ -180,11 +178,13 @@ LCMS mzXMLParser::parseFile(const std::string& filename) {
 			if (!XML_ParseBuffer(parser, bytes_read, bytes_read == 0)) {
 				throw std::runtime_error("could not parse buffer");
 			}
-
 			if (bytes_read == 0) {
 				break;
 			}
-			i++;
+			else
+			{
+				show_progress += bytes_read;
+			}
 		}
 		fclose(fd);
 
