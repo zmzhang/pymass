@@ -5,6 +5,8 @@
 #include <iostream>    
 #include <algorithm>    
 #include <vector> 
+#include <stack>
+#include <ctime>
 #include "pymass_export.h"
 
 template <typename T>
@@ -24,5 +26,9 @@ Eigen::VectorXi PYMASS_EXPORT searchsorted(const Eigen::VectorXf& v, const Eigen
 Eigen::VectorXi PYMASS_EXPORT findclosest(const Eigen::VectorXf& v, const Eigen::VectorXf& t);
 float PYMASS_EXPORT ReverseFloat(const float inFloat);
 void PYMASS_EXPORT finishProcess();
+
+extern std::stack<clock_t> tictoc_stack;
+void tic();
+void toc();
 
 #endif

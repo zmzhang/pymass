@@ -1,6 +1,7 @@
 #include "utils.h"
 #include <chrono>
 #include <thread>
+#include <iostream>
 
 using namespace std;
 using namespace Eigen; 
@@ -54,4 +55,17 @@ float ReverseFloat(const float inFloat)
 	returnFloat[3] = floatToConvert[0];
 
 	return retVal;
+}
+
+
+std::stack<clock_t> tictoc_stack;
+void tic() {
+	tictoc_stack.push(clock());
+}
+
+void toc() {
+	std::cout << "Time elapsed: "
+		<< ((double)(clock() - tictoc_stack.top())) / CLOCKS_PER_SEC
+		<< std::endl;
+	tictoc_stack.pop();
 }
