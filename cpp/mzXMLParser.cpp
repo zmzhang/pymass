@@ -50,10 +50,10 @@ void mzXMLParser::InitHandlers() {
 			map<string, string> atts = a.m_scanAttributes.back();
 			size_t nLen = atts["retentionTime"].length();
 			scan.RT = stod(atts["retentionTime"].substr(2, nLen - 3));
-			if (atts.find("basePeakIntensity")!=atts.end())
+			if (atts.find("basePeakIntensity") != atts.end())
 			{
 				scan.BIC = stod(atts["basePeakIntensity"]);
-			}			
+			}
 			for (int i = 0; i < nNum; i++)
 			{
 				scan.mz[i] = ReverseFloat(floatArray[2 * i]);
