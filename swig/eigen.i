@@ -214,6 +214,8 @@
   };
 
   template<> int NumPyType<double>() {return NPY_DOUBLE;};
+
+  template<> int NumPyType<float>() {return NPY_FLOAT;};
 %}
 
 // ----------------------------------------------------------------------------

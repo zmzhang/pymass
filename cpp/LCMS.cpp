@@ -7,23 +7,23 @@
 using namespace std;
 
 
-Eigen::VectorXd LCMS::getBIC()
+Eigen::VectorXf LCMS::getBIC()
 {
-	return Eigen::VectorXd::Map(m_vecBIC.data(), m_vecBIC.size());
+	return Eigen::VectorXf::Map(m_vecBIC.data(), m_vecBIC.size());
 }
 
-Eigen::VectorXd LCMS::getRT()
+Eigen::VectorXf LCMS::getRT()
 {
-	return Eigen::VectorXd::Map(m_vecRT.data(), m_vecRT.size());
+	return Eigen::VectorXf::Map(m_vecRT.data(), m_vecRT.size());
 }
 
-Eigen::VectorXd LCMS::getTIC()
+Eigen::VectorXf LCMS::getTIC()
 {
-	return Eigen::VectorXd::Map(m_vecTIC.data(), m_vecTIC.size());
+	return Eigen::VectorXf::Map(m_vecTIC.data(), m_vecTIC.size());
 }
 
 
-Eigen::VectorXd LCMS::getMS(int i, int level)
+Eigen::VectorXf LCMS::getMS(int i, int level)
 {
 	if (level == 1)
 	{
@@ -33,12 +33,12 @@ Eigen::VectorXd LCMS::getMS(int i, int level)
 	{
 		return m_massScans[i].childs[0]->mz;
 	}
-	return Eigen::VectorXd(0, 0);
+	return Eigen::VectorXf(0, 0);
 }
 
 
 
-Eigen::VectorXd LCMS::getVal(int i, int level)
+Eigen::VectorXf LCMS::getVal(int i, int level)
 {
 	if (level == 1)
 	{
@@ -48,11 +48,11 @@ Eigen::VectorXd LCMS::getVal(int i, int level)
 	{
 		return m_massScans[i].childs[0]->val;
 	}
-	return Eigen::VectorXd(0, 0);
+	return Eigen::VectorXf(0, 0);
 }
 
-Eigen::MatrixXd LCMS::getRegion(double rt_begin, double rt_end, double mz_begin, double mz_end)
+Eigen::MatrixXf LCMS::getRegion(float rt_begin, float rt_end, float mz_begin, float mz_end)
 {
-	Eigen::MatrixXd ret;
+	Eigen::MatrixXf ret;
 	return ret;
 }

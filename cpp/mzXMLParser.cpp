@@ -43,22 +43,19 @@ void mzXMLParser::InitHandlers() {
 			size_t nNum = outlen / (2 * sizeof(float));
 			float* floatArray = reinterpret_cast<float*>(raw);
 			MassScan& scan = a.m_LCMS.m_massScans.back();
-			scan.mz.resize(nNum);
-			scan.val.resize(nNum);
 			scan.precursor_mz = -1;
 
 			map<string, string> atts = a.m_scanAttributes.back();
 			size_t nLen = atts["retentionTime"].length();
-			scan.RT = stod(atts["retentionTime"].substr(2, nLen - 3));
+			scan.RT = stof(atts["retentionTime"].substr(2, nLen - 3));
 			if (atts.find("basePeakIntensity") != atts.end())
 			{
-				scan.BIC = stod(atts["basePeakIntensity"]);
+				scan.BIC = stof(atts["basePeakIntensity"]);
 			}
-			for (int i = 0; i < nNum; i++)
-			{
-				scan.mz[i] = ReverseFloat(floatArray[2 * i]);
-				scan.val[i] = ReverseFloat(floatArray[2 * i + 1]);
-			}
+
+			byteswap_avx2(reinterpret_cast<uint32_t*>(floatArray), nNum * 2);
+			scan.mz = Eigen::Map<Eigen::VectorXf, 0, Eigen::InnerStride<2>>(floatArray, nNum);
+			scan.val = Eigen::Map<Eigen::VectorXf, 0, Eigen::InnerStride<2>>(floatArray+1, nNum);
 			scan.TIC = scan.val.sum();
 			delete[] raw;
 		}
@@ -73,25 +70,19 @@ void mzXMLParser::InitHandlers() {
 			base64_decode(str.data(), str.size(), raw, &outlen, BASE64_FORCE_AVX2);
 			size_t nNum = outlen / (2 * sizeof(float));
 			float* floatArray = reinterpret_cast<float*>(raw);
-
 			shared_ptr<MassScan> pscan = a.m_LCMS.m_massScans.back().childs.back();
-			pscan->mz.resize(nNum);
-			pscan->val.resize(nNum);
-
-
 			map<string, string> atts = a.m_scanAttributes.back();
 			size_t nLen = atts["retentionTime"].length();
-			pscan->RT = stod(atts["retentionTime"].substr(2, nLen - 3));
+			pscan->RT = stof(atts["retentionTime"].substr(2, nLen - 3));
 			if (atts.find("basePeakIntensity") != atts.end())
 			{
-				pscan->BIC = stod(atts["basePeakIntensity"]);
+				pscan->BIC = stof(atts["basePeakIntensity"]);
 			}
-			pscan->precursor_mz = stod(atts["basePeakMz"]);;
-			for (int i = 0; i < nNum; i++)
-			{
-				pscan->mz[i] = ReverseFloat(floatArray[2 * i]);
-				pscan->val[i] = ReverseFloat(floatArray[2 * i + 1]);
-			}
+			pscan->precursor_mz = stof(atts["basePeakMz"]);
+
+			byteswap_avx2(reinterpret_cast<uint32_t*>(floatArray), nNum * 2);
+			pscan->mz = Eigen::Map<Eigen::VectorXf, 0, Eigen::InnerStride<2>>(floatArray, nNum);
+			pscan->val = Eigen::Map<Eigen::VectorXf, 0, Eigen::InnerStride<2>>(floatArray + 1, nNum);
 			pscan->TIC = pscan->val.sum();
 			delete[] raw;
 		}
@@ -168,7 +159,7 @@ LCMS mzXMLParser::parseFile(const std::string& filename) {
 		fseek(fd, 0L, SEEK_END);
 		long sz = ftell(fd); rewind(fd);
 
-		const size_t BUFFER_SIZE = std::min(long(50*1024*1024), sz/50);
+		int BUFFER_SIZE = std::min(long(50*1024*1024), sz/50);
 		boost::progress_display show_progress(sz);
 		for (;;) {
 			void *buffer = XML_GetBuffer(parser, BUFFER_SIZE);

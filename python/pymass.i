@@ -31,6 +31,9 @@ namespace std {
 %eigen_typemaps(Eigen::VectorXd)
 %eigen_typemaps(Eigen::MatrixXd)
 %eigen_typemaps(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>)
+%eigen_typemaps(Eigen::VectorXf)
+%eigen_typemaps(Eigen::MatrixXf)
+%eigen_typemaps(Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic>)
 
 
 

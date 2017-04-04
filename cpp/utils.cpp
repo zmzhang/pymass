@@ -58,7 +58,7 @@ float ReverseFloat(const float inFloat)
 }
 
 
-std::stack<clock_t> tictoc_stack;
+PYMASS_EXPORT std::stack<clock_t> tictoc_stack;
 void tic() {
 	tictoc_stack.push(clock());
 }

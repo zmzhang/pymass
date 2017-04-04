@@ -14,9 +14,9 @@ void testMZXML() {
 		tic();
 		//LCMS lcms = e.parseFile("D:/workspace/pymass/python/标2-方法5-正负离子_Seg1Ev1.mzXML");
 		LCMS lcms = e.parseFile("C:/workspace/pymass/python/mixture_bsa300fmol_n3.mzXML");
-		//cout << lcms.getMS(3, 2).transpose() << endl;
-		//cout << lcms.getVal(3, 2).transpose() << endl;
 		toc();
+		//cout << lcms.getTIC().transpose() << endl;
+		//cout << lcms.getRT().transpose() << endl;
 	}
 }
 
@@ -25,7 +25,7 @@ void testFindClosest()
 	VectorXf v(10);
 	v << 1, 2, 3, 4, 5, 5, 6, 7, 8, 9;
 	VectorXf t(3);
-	t << 1.1, 6.5, 9.5;
+	t << 1.1f, 6.5f, 9.5f;
 
 
 	cout << searchsorted(v, t) << endl;

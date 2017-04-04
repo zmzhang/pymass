@@ -14,12 +14,12 @@
 struct PYMASS_EXPORT MassScan
 {
 public:
-	Eigen::VectorXd mz;
-	Eigen::VectorXd val;
-	double precursor_mz;
-	double RT;
-	double BIC;
-	double TIC;
+	Eigen::VectorXf mz;
+	Eigen::VectorXf val;
+	float precursor_mz;
+	float RT;
+	float BIC;
+	float TIC;
 	std::vector<std::shared_ptr<MassScan> > childs;
 };
 
@@ -32,16 +32,16 @@ public:
 	void push_back(const MassScan& scan) { m_massScans.push_back(scan); }
 	std::vector<MassScan> m_massScans;
 
-	std::vector<double> m_vecBIC;
-	std::vector<double> m_vecRT;
-	std::vector<double> m_vecTIC;
+	std::vector<float> m_vecBIC;
+	std::vector<float> m_vecRT;
+	std::vector<float> m_vecTIC;
 
-	Eigen::VectorXd getBIC();
-	Eigen::VectorXd getRT();
-	Eigen::VectorXd getTIC();
-	Eigen::VectorXd getMS(int i, int level = 1);
-	Eigen::VectorXd getVal(int i, int level = 1);
-	Eigen::MatrixXd getRegion(double rt_begin, double rt_end, double mz_begin, double mz_end);
+	Eigen::VectorXf getBIC();
+	Eigen::VectorXf getRT();
+	Eigen::VectorXf getTIC();
+	Eigen::VectorXf getMS(int i, int level = 1);
+	Eigen::VectorXf getVal(int i, int level = 1);
+	Eigen::MatrixXf getRegion(float rt_begin, float rt_end, float mz_begin, float mz_end);
 
 };
 
