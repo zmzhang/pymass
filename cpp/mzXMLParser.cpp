@@ -143,6 +143,7 @@ void mzXMLParser::parseString(string s) {
 }
 
 #include <boost/progress.hpp>
+#include <thread>
 
 LCMS mzXMLParser::parseFile(const std::string& filename) {
 	cout << "Parsing " + filename << endl;
@@ -158,31 +159,49 @@ LCMS mzXMLParser::parseFile(const std::string& filename) {
 
 		fseek(fd, 0L, SEEK_END);
 		long sz = ftell(fd); rewind(fd);
-
-		int BUFFER_SIZE = std::min(long(50*1024*1024), sz/50);
+		int BUFFER_SIZE = std::min(long(50 * 1024 * 1024), sz / 50);
+		int CHUNK_NUM = int(ceil(float(sz) / BUFFER_SIZE));
+		std::vector<void *> buf_ptr(CHUNK_NUM, NULL);
+		std::vector<int> buf_sz(CHUNK_NUM, NULL);
 		boost::progress_display show_progress(sz);
-		for (;;) {
-			void *buffer = XML_GetBuffer(parser, BUFFER_SIZE);
-			if (buffer == NULL) {
-				throw std::runtime_error("out of memory");
-			}
 
-			int bytes_read = static_cast<int>(fread(buffer, 1, BUFFER_SIZE, fd));
-			if (bytes_read < 0) {
-				throw std::runtime_error("error reading file");
-			}
-
-			if (!XML_ParseBuffer(parser, bytes_read, bytes_read == 0)) {
-				throw std::runtime_error("could not parse buffer");
-			}
-			if (bytes_read == 0) {
-				break;
-			}
-			else
+		std::thread read_thread([this,fd,&buf_ptr,&buf_sz, BUFFER_SIZE]() {
+			for (int i = 0; i < buf_ptr.size(); i++)
 			{
+				void *buffer = new char[BUFFER_SIZE];
+				if (buffer == NULL) {
+					throw std::runtime_error("out of memory");
+				}
+				int bytes_read = static_cast<int>(fread(buffer, 1, BUFFER_SIZE, fd));
+				if (bytes_read < 0) {
+					throw std::runtime_error("error reading file");
+				}
+				buf_ptr[i] = buffer;
+				buf_sz[i] = bytes_read;
+			}
+
+		});
+
+		std::thread parser_thread([this, &buf_ptr, &buf_sz, &show_progress]() {
+			for (int i = 0; i < buf_ptr.size(); i++)
+			{
+				while(buf_ptr[i]==NULL)
+				{
+					//std::this_thread::sleep_for(std::chrono::milliseconds(1));
+				}
+				int bytes_read = buf_sz[i];
+				void *buffer = XML_GetBuffer(parser, bytes_read);
+				memcpy(buffer, buf_ptr[i], bytes_read);
+				delete[] buf_ptr[i];
+				if (!XML_ParseBuffer(parser, bytes_read, bytes_read == 0)) {
+						throw std::runtime_error("could not parse buffer");
+				}
 				show_progress += bytes_read;
 			}
-		}
+		});
+		read_thread.join();
+		parser_thread.join();
+
 		fclose(fd);
 
 		for (auto &i : m_LCMS.m_massScans) {
