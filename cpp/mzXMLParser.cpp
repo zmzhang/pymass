@@ -187,7 +187,7 @@ LCMS mzXMLParser::parseFile(const std::string& filename) {
 			{
 				while(buf_ptr[i]==NULL)
 				{
-					//std::this_thread::sleep_for(std::chrono::milliseconds(1));
+					std::this_thread::sleep_for(std::chrono::milliseconds(1));
 				}
 				int bytes_read = buf_sz[i];
 				void *buffer = XML_GetBuffer(parser, bytes_read);
