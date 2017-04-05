@@ -161,14 +161,14 @@ LCMS mzXMLParser::parseFile(const std::string& filename) {
 		long sz = ftell(fd); rewind(fd);
 		int BUFFER_SIZE = std::min(long(50 * 1024 * 1024), sz / 50);
 		int CHUNK_NUM = int(ceil(float(sz) / BUFFER_SIZE));
-		std::vector<void *> buf_ptr(CHUNK_NUM, NULL);
+		std::vector<char *> buf_ptr(CHUNK_NUM, NULL);
 		std::vector<int> buf_sz(CHUNK_NUM, NULL);
 		boost::progress_display show_progress(sz);
 
 		std::thread read_thread([this,fd,&buf_ptr,&buf_sz, BUFFER_SIZE]() {
 			for (int i = 0; i < buf_ptr.size(); i++)
 			{
-				void *buffer = new char[BUFFER_SIZE];
+				char *buffer = new char[BUFFER_SIZE];
 				if (buffer == NULL) {
 					throw std::runtime_error("out of memory");
 				}
@@ -190,12 +190,10 @@ LCMS mzXMLParser::parseFile(const std::string& filename) {
 					std::this_thread::sleep_for(std::chrono::milliseconds(1));
 				}
 				int bytes_read = buf_sz[i];
-				void *buffer = XML_GetBuffer(parser, bytes_read);
-				memcpy(buffer, buf_ptr[i], bytes_read);
-				delete[] buf_ptr[i];
-				if (!XML_ParseBuffer(parser, bytes_read, bytes_read == 0)) {
+				if (!XML_Parse(parser, buf_ptr[i], bytes_read, bytes_read == 0)) {
 						throw std::runtime_error("could not parse buffer");
 				}
+				delete[] buf_ptr[i];
 				show_progress += bytes_read;
 			}
 		});
