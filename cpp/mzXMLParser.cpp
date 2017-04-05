@@ -178,6 +178,7 @@ LCMS mzXMLParser::parseFile(const std::string& filename) {
 				}
 				buf_ptr[i] = buffer;
 				buf_sz[i] = bytes_read;
+				//cout << "read" << i << endl;
 			}
 
 		});
@@ -195,6 +196,7 @@ LCMS mzXMLParser::parseFile(const std::string& filename) {
 				}
 				delete[] buf_ptr[i];
 				show_progress += bytes_read;
+				//cout << "parse" << i << endl;
 			}
 		});
 		read_thread.join();
@@ -279,7 +281,6 @@ void mzXMLParser::endElement(void *data, const char *name) {
 
 void mzXMLParser::characterDataHandler(void *data, char const *d, int len) {
 	
-
 	mzXMLParser* e = static_cast<mzXMLParser *>(data);
 	e->currentText_ += std::string(d, len);
 	if (e->valueHandlers.find(e->currentElement_) != e->valueHandlers.end()) {
