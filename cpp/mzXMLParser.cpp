@@ -182,7 +182,7 @@ LCMS mzXMLParser::parseFile(const std::string& filename) {
 
 		});
 
-		std::thread parser_thread([this, &buf_ptr, &buf_sz, &show_progress]() {
+		std::thread parse_thread([this, &buf_ptr, &buf_sz, &show_progress]() {
 			for (int i = 0; i < buf_ptr.size(); i++)
 			{
 				while(buf_ptr[i]==NULL)
@@ -200,7 +200,7 @@ LCMS mzXMLParser::parseFile(const std::string& filename) {
 			}
 		});
 		read_thread.join();
-		parser_thread.join();
+		parse_thread.join();
 
 		fclose(fd);
 
