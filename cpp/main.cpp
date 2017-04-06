@@ -14,6 +14,7 @@ void testMZXML() {
 		tic();
 		//LCMS lcms = e.parseFile("D:/workspace/pymass/python/标2-方法5-正负离子_Seg1Ev1.mzXML");
 		LCMS lcms = e.parseFile("../../python/mixture_bsa300fmol_n3.mzXML");
+		//LCMS lcms = e.parseFile("../../python/detnoise_sigma3_PICKED.mzXML");
 		toc();
 		//cout << lcms.getTIC().transpose() << endl;
 		//cout << lcms.getRT().transpose() << endl;
