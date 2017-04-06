@@ -46,6 +46,9 @@ private:
 	std::map<std::string, std::string> currentAttributes_;
 	std::string currentElement_;
 	std::string currentText_;
+	char *      pCurrentTextStart;
+	int         nCurrentTextLen;
+	bool        bPeaks;
 };
 
 
