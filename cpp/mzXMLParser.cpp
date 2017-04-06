@@ -178,7 +178,6 @@ LCMS mzXMLParser::parseFile(const std::string& filename) {
 				}
 				buf_ptr[i] = buffer;
 				buf_sz[i] = bytes_read;
-				//cout << "read" << i << endl;
 			}
 
 		});
@@ -192,11 +191,10 @@ LCMS mzXMLParser::parseFile(const std::string& filename) {
 				}
 				int bytes_read = buf_sz[i];
 				if (!XML_Parse(parser, buf_ptr[i], bytes_read, bytes_read == 0)) {
-						throw std::runtime_error("could not parse buffer");
+					throw std::runtime_error("could not parse buffer");
 				}
 				delete[] buf_ptr[i];
 				show_progress += bytes_read;
-				//cout << "parse" << i << endl;
 			}
 		});
 		read_thread.join();
