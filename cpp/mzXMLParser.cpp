@@ -20,10 +20,7 @@ void mzXMLParser::InitHandlers() {
 	});
 
 	AddStartElementHandler("peaks", [](mzXMLParser& a) -> void {
-		//a.setCurrentText("");
-		a.nCurrentTextLen = 0;
-		a.pCurrentTextStart = NULL;
-		a.bPeaks = true;
+		a.setCurrentText("");
 		if (a.m_scanAttributes.size() == 1)
 		{
 			MassScan scan;
@@ -90,10 +87,7 @@ void mzXMLParser::InitHandlers() {
 			delete[] raw;
 		}
 
-		//a.setCurrentText("");
-		a.nCurrentTextLen = 0;
-		a.pCurrentTextStart = NULL;
-		a.bPeaks = false;
+		a.setCurrentText("");
 	});
 
 	
@@ -184,7 +178,6 @@ LCMS mzXMLParser::parseFile(const std::string& filename) {
 				}
 				buf_ptr[i] = buffer;
 				buf_sz[i] = bytes_read;
-				cout << "read" << i << endl;
 			}
 
 		});
@@ -198,11 +191,10 @@ LCMS mzXMLParser::parseFile(const std::string& filename) {
 				}
 				int bytes_read = buf_sz[i];
 				if (!XML_Parse(parser, buf_ptr[i], bytes_read, bytes_read == 0)) {
-						throw std::runtime_error("could not parse buffer");
+					throw std::runtime_error("could not parse buffer");
 				}
 				delete[] buf_ptr[i];
-				//show_progress += bytes_read;
-				cout << "parse" << i << endl;
+				show_progress += bytes_read;
 			}
 		});
 		read_thread.join();
@@ -288,16 +280,9 @@ void mzXMLParser::endElement(void *data, const char *name) {
 void mzXMLParser::characterDataHandler(void *data, char const *d, int len) {
 	
 	mzXMLParser* e = static_cast<mzXMLParser *>(data);
-	if (e->bPeaks)
-	{
-		if (e->nCurrentTextLen==0)
-		{
-			e->pCurrentTextStart = (char*) d;
-		}
-		e->nCurrentTextLen += len;
-		if (e->valueHandlers.find(e->currentElement_) != e->valueHandlers.end()) {
-			e->valueHandlers.find(e->currentElement_)->second(*e);
-		}
+	e->currentText_ += std::string(d, len);
+	if (e->valueHandlers.find(e->currentElement_) != e->valueHandlers.end()) {
+		e->valueHandlers.find(e->currentElement_)->second(*e);
 	}
 }
       
