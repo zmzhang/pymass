@@ -202,11 +202,6 @@ LCMS mzXMLParser::parseFile(const std::string& filename) {
 
 		fclose(fd);
 
-		for (auto &i : m_LCMS.m_massScans) {
-			m_LCMS.m_vecBIC.push_back(i.BIC);
-			m_LCMS.m_vecTIC.push_back(i.TIC);
-			m_LCMS.m_vecRT.push_back(i.RT);
-		}
 		cout << endl;
 
 	}

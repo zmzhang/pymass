@@ -7,24 +7,43 @@
 using namespace std;
 
 
+void LCMS::update()
+{
+	if(m_vecBIC.size()!=m_massScans.size() || m_vecRT.size()!=m_massScans.size() || m_vecTIC.size()!= m_massScans.size())
+	{
+		m_vecBIC.resize(m_massScans.size());
+		m_vecTIC.resize(m_massScans.size());
+		m_vecRT.resize(m_massScans.size());
+		for (int i = 0; i < m_massScans.size(); i++) {
+			m_vecBIC[i]= m_massScans[i].BIC;
+			m_vecTIC[i] = m_massScans[i].TIC;
+			m_vecRT[i] = m_massScans[i].RT;
+		}
+	}
+}
+
 Eigen::VectorXf LCMS::getBIC()
 {
-	return Eigen::VectorXf::Map(m_vecBIC.data(), m_vecBIC.size());
+	update();
+	return m_vecBIC;
 }
 
 Eigen::VectorXf LCMS::getRT()
 {
-	return Eigen::VectorXf::Map(m_vecRT.data(), m_vecRT.size());
+	update();
+	return m_vecRT;
 }
 
 Eigen::VectorXf LCMS::getTIC()
 {
-	return Eigen::VectorXf::Map(m_vecTIC.data(), m_vecTIC.size());
+	update();
+	return m_vecTIC;
 }
 
 
 Eigen::VectorXf LCMS::getMS(int i, int level)
 {
+	update();
 	if (level == 1)
 	{
 		return m_massScans[i].mz;
@@ -40,6 +59,7 @@ Eigen::VectorXf LCMS::getMS(int i, int level)
 
 Eigen::VectorXf LCMS::getVal(int i, int level)
 {
+	update();
 	if (level == 1)
 	{
 		return m_massScans[i].val;
@@ -53,6 +73,8 @@ Eigen::VectorXf LCMS::getVal(int i, int level)
 
 Eigen::MatrixXf LCMS::getRegion(float rt_begin, float rt_end, float mz_begin, float mz_end)
 {
+	update();
 	Eigen::MatrixXf ret;
+
 	return ret;
 }

@@ -32,9 +32,9 @@ public:
 	void push_back(const MassScan& scan) { m_massScans.push_back(scan); }
 	std::vector<MassScan> m_massScans;
 
-	std::vector<float> m_vecBIC;
-	std::vector<float> m_vecRT;
-	std::vector<float> m_vecTIC;
+	Eigen::VectorXf m_vecBIC;
+	Eigen::VectorXf m_vecRT;
+	Eigen::VectorXf m_vecTIC;
 
 	Eigen::VectorXf getBIC();
 	Eigen::VectorXf getRT();
@@ -42,6 +42,9 @@ public:
 	Eigen::VectorXf getMS(int i, int level = 1);
 	Eigen::VectorXf getVal(int i, int level = 1);
 	Eigen::MatrixXf getRegion(float rt_begin, float rt_end, float mz_begin, float mz_end);
+
+private:
+	void update();
 
 };
 
