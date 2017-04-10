@@ -1,5 +1,6 @@
 #pragma once
 
+#include <list>
 #include "base64.h"
 #include "utils.h"
 #include "LCMS.h"
@@ -75,6 +76,21 @@ Eigen::MatrixXf LCMS::getRegion(float rt_begin, float rt_end, float mz_begin, fl
 {
 	update();
 	Eigen::MatrixXf ret;
+	std::list<Eigen::VectorXi> mzi_vec;
+	Eigen::VectorXf rts(2); rts << rt_begin, rt_end;
+	Eigen::VectorXf mzs(2); mzs << mz_begin, mz_end;
+	Eigen::VectorXi rti = findclosest(m_vecRT, rts);
+	for (int i = rti[0]; i<rti[1]; i++)
+	{
+		Eigen::VectorXi mzi = findclosest(m_massScans[i].mz, mzs);
+		mzi_vec.push_back(mzi);
+	}
+
+	//todo:
+	//	std::accumulate(mzi_vec)
+	//	resize ret matrix
+	//	slice(m_massScans[i].mz, mzi);
+	//	slice(m_massScans[i].val, mzi);
 
 	return ret;
 }
