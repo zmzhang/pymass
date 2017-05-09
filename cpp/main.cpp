@@ -18,6 +18,7 @@ void testMZXML() {
 		toc();
 		//cout << lcms.getTIC().transpose() << endl;
 		//cout << lcms.getRT().transpose() << endl;
+		cout << lcms.getRegion(1000,1100,500,501) << endl;
 	}
 }
 
@@ -38,6 +39,6 @@ void testFindClosest()
 int main(int argc, const char * argv[]) {
     
 	testMZXML();  
-	testFindClosest();
+	//testFindClosest();
     return 0;
 }

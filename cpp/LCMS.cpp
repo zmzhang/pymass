@@ -5,6 +5,7 @@
 #include "utils.h"
 #include "LCMS.h"
 
+#include <numeric>
 using namespace std;
 
 
@@ -76,7 +77,7 @@ Eigen::MatrixXf LCMS::getRegion(float rt_begin, float rt_end, float mz_begin, fl
 {
 	update();
 	Eigen::MatrixXf ret;
-	std::list<Eigen::VectorXi> mzi_vec;
+	std::vector<Eigen::VectorXi> mzi_vec;
 	Eigen::VectorXf rts(2); rts << rt_begin, rt_end;
 	Eigen::VectorXf mzs(2); mzs << mz_begin, mz_end;
 	Eigen::VectorXi rti = findclosest(m_vecRT, rts);
@@ -86,11 +87,20 @@ Eigen::MatrixXf LCMS::getRegion(float rt_begin, float rt_end, float mz_begin, fl
 		mzi_vec.push_back(mzi);
 	}
 
-	//todo:
-	//	std::accumulate(mzi_vec)
-	//	resize ret matrix
-	//	slice(m_massScans[i].mz, mzi);
-	//	slice(m_massScans[i].val, mzi);
+	int rows = std::accumulate(mzi_vec.begin(), mzi_vec.end(), 0, [](int s, const Eigen::VectorXi & mzi) {
+		return s + (mzi[1] - mzi[0]);
+	}); 
+
+	ret.resize(rows, 3);
+	int s = 0;
+	for (int i = 0; i<mzi_vec.size(); i++)
+	{
+		int step = mzi_vec[i][1] - mzi_vec[i][0];
+		ret.col(0).segment(s, step) = Eigen::VectorXf::Constant(step, m_vecRT[i + rti[0]]);
+		ret.col(1).segment(s, step) = m_massScans[i + rti[0]].mz.segment(mzi_vec[0][0], step);
+		ret.col(2).segment(s, step) = m_massScans[i + rti[0]].val.segment(mzi_vec[0][0], step);
+		s += step;
+	}
 
 	return ret;
 }
