@@ -57,6 +57,10 @@ endif()
 add_definitions(-DUNICODE -D_UNICODE -D_CRT_SECURE_NO_DEPRECATE /wd4251 /wd4819 /wd4244)
 
 
+include_directories(cpp)
+include_directories(cuda)
+
+
 add_subdirectory(cpp)
 add_subdirectory(python)
 add_subdirectory(cuda)

@@ -6,35 +6,10 @@
 #include <thrust/copy.h>
 #include <algorithm>
 #include <cstdlib>
+#include "cuda_sort.h"
 
 
 using namespace std;
-
-
-#include <chrono>
-#include <stack>
-std::stack<clock_t> tictoc_stack;
-void tic() {
-	tictoc_stack.push(clock());
-}
-
-void toc() {
-	std::cout << "Time elapsed: "
-		<< ((double)(clock() - tictoc_stack.top())) / CLOCKS_PER_SEC
-		<< std::endl;
-	tictoc_stack.pop();
-}
-
-
-void thrustSort(float *V, int *K, int N)
-{
-	thrust::device_vector<float> d_V(V, V+N);
-	thrust::device_vector<int> d_K(N);
-	thrust::sequence(d_K.begin(), d_K.end(), 0, 1);
-	thrust::sort_by_key(d_V.begin(), d_V.end(), d_K.begin());
-	thrust::copy(d_K.begin(), d_K.end(), K);
-	thrust::copy(d_V.begin(), d_V.end(), V);
-}
 
 int main() {
 	cudaFree(0);

@@ -2,6 +2,7 @@
 #include <fstream>
 #include "mzXMLParser.h"
 #include "utils.h"
+#include "cuda_sort.h"
 
 using namespace std;
 using namespace Eigen;
@@ -41,5 +42,16 @@ int main(int argc, const char * argv[]) {
     
 	testMZXML();  
 	//testFindClosest();
+
+	VectorXf t(4);
+	t << 1.1f, 6.5f, 9.5f, 3.0f;
+	VectorXi ids(4);
+
+	thrustSort(t.data(),ids.data(), 4);
+
+	cout << t <<endl;
+	cout << ids;
+
+
     return 0;
 }
