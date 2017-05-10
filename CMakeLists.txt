@@ -43,7 +43,14 @@ get_filename_component(BASE64_ABS_PATH "../thirdparty/base64SIMD" ABSOLUTE)
 include_directories("${BASE64_ABS_PATH}/include")
 link_directories("${BASE64_ABS_PATH}/lib")
 
-
+# find CUDA
+FIND_PACKAGE(CUDA)
+if(CUDA_FOUND)
+	message("CUDA is found.")
+	set(CUDA_NVCC_FLAGS "-Xcompiler \"/wd 4819 /wd 4244\"")
+else(CUDA_FOUND)
+    message("CUDA is not installed on this system.")
+endif()
 
 
 add_definitions(-DUNICODE -D_UNICODE -D_CRT_SECURE_NO_DEPRECATE /wd4251 /wd4819)
@@ -51,3 +58,4 @@ add_definitions(-DUNICODE -D_UNICODE -D_CRT_SECURE_NO_DEPRECATE /wd4251 /wd4819)
 
 add_subdirectory(cpp)
 add_subdirectory(python)
+add_subdirectory(cuda)

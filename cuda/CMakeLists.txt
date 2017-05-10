@@ -1,0 +1,1 @@
+cuda_add_executable(cuda_sort sort.cu)
