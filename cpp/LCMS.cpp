@@ -24,6 +24,26 @@ void LCMS::update()
 	}
 }
 
+Eigen::MatrixXf LCMS::getAll()
+{
+	update();
+	int rows = std::accumulate(m_massScans.begin(), m_massScans.end(), 0, [](int s, const MassScan & mss) {
+		return s + mss.mz.size();
+	});
+	Eigen::MatrixXf ret;
+	ret.resize(rows, 3);
+	int s = 0;
+	for (int i = 0; i < m_massScans.size(); i++)
+	{
+		int step = m_massScans[i].mz.size();
+		ret.col(0).segment(s, step) = Eigen::VectorXf::Constant(step, m_massScans[i].RT);
+		ret.col(1).segment(s, step) = m_massScans[i].mz;
+		ret.col(2).segment(s, step) = m_massScans[i].val;
+		s += step;
+	}
+	return ret;
+}
+
 Eigen::VectorXf LCMS::getBIC()
 {
 	update();

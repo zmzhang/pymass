@@ -19,6 +19,7 @@ void testMZXML() {
 		//cout << lcms.getTIC().transpose() << endl;
 		//cout << lcms.getRT().transpose() << endl;
 		cout << lcms.getRegion(1000,1100,500,501) << endl;
+		Eigen::MatrixXf rmv = lcms.getAll();
 	}
 }
 

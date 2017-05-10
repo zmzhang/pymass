@@ -36,12 +36,14 @@ public:
 	Eigen::VectorXf m_vecRT;
 	Eigen::VectorXf m_vecTIC;
 
+	Eigen::MatrixXf getAll();
 	Eigen::VectorXf getBIC();
 	Eigen::VectorXf getRT();
 	Eigen::VectorXf getTIC();
 	Eigen::VectorXf getMS(int i, int level = 1);
 	Eigen::VectorXf getVal(int i, int level = 1);
 	Eigen::MatrixXf getRegion(float rt_begin, float rt_end, float mz_begin, float mz_end);
+
 
 private:
 	void update();

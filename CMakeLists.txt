@@ -47,13 +47,14 @@ link_directories("${BASE64_ABS_PATH}/lib")
 FIND_PACKAGE(CUDA)
 if(CUDA_FOUND)
 	message("CUDA is found.")
-	set(CUDA_NVCC_FLAGS "-Xcompiler \"/wd 4819 /wd 4244\"")
+	set(CUDA_NVCC_FLAGS "-Xcompiler \"/wd 4819 /wd 4244 /wd 4267\" ")
+	set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS}; -O3 -gencode arch=compute_52,code=sm_52)
 else(CUDA_FOUND)
     message("CUDA is not installed on this system.")
 endif()
 
 
-add_definitions(-DUNICODE -D_UNICODE -D_CRT_SECURE_NO_DEPRECATE /wd4251 /wd4819)
+add_definitions(-DUNICODE -D_UNICODE -D_CRT_SECURE_NO_DEPRECATE /wd4251 /wd4819 /wd4244)
 
 
 add_subdirectory(cpp)
