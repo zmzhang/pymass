@@ -28,23 +28,21 @@ void toc() {
 
 void thrustSort(float *V, int *K, int N)
 {
+	thrust::device_vector<float> d_V(V, V+N);
 	thrust::device_vector<int> d_K(N);
-	thrust::device_vector<float> d_V(V, V + N);
 	thrust::sequence(d_K.begin(), d_K.end(), 0, 1);
-	tic();
 	thrust::sort_by_key(d_V.begin(), d_V.end(), d_K.begin());
-	toc();
 	thrust::copy(d_K.begin(), d_K.end(), K);
 	thrust::copy(d_V.begin(), d_V.end(), V);
 }
 
 int main() {
+	cudaFree(0);
 	int size = 100*1024*1024;
 	thrust::host_vector<float> h_values(size);
 	thrust::host_vector<int> h_keys(size);
-	tic();
+	
 	std::generate(h_values.begin(), h_values.end(), rand);
-	toc();
 
 	thrustSort(h_values.data(), h_keys.data(), h_values.size());
 
