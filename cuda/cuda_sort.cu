@@ -35,3 +35,9 @@ void thrustSort(float *V, int *K, int N)
 	thrust::copy(d_K.begin(), d_K.end(), K);
 	thrust::copy(d_V.begin(), d_V.end(), V);
 }
+
+void processLCMS(const LCMS & lcms)
+{
+	cout << "using lcms object in CUDA, and its scan size is: " << lcms.m_massScans.size() << endl;
+}
+
