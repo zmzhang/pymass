@@ -19,7 +19,7 @@ void testMZXML() {
 		toc();
 		//cout << lcms.getTIC().transpose() << endl;
 		//cout << lcms.getRT().transpose() << endl;
-		cout << lcms.getRegion(1000,1100,500,501) << endl;
+		//cout << lcms.getRegion(1000,1100,500,501) << endl;
 		Eigen::MatrixXf rmv = lcms.getAll();
 
 		processLCMS(lcms);
@@ -42,7 +42,6 @@ void testFindClosest()
 
 
 int main(int argc, const char * argv[]) {
-    
 	testMZXML();  
 	//testFindClosest();
 
@@ -52,7 +51,7 @@ int main(int argc, const char * argv[]) {
 
 	thrustSort(t.data(),ids.data(), 4);
 
-	cout << t <<endl;
+	cout << t << endl;
 	cout << ids;
 
 

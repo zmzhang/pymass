@@ -9,7 +9,7 @@ extern std::stack<clock_t> gtictoc_stack;
 void gtic();
 void gtoc();
 
-void processLCMS(const LCMS & lcms);
+void processLCMS(LCMS & lcms);
 
 
 #endif
