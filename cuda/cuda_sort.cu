@@ -43,9 +43,27 @@ void sort_by_col(Eigen::MatrixXf & m, int col)
 	}
 }
 
-std::set<Eigen::VectorXf> pic_seed(const Eigen::MatrixXf & m, float mz_tol)
+
+
+
+std::set<Eigen::VectorXf, mz_comp> pic_seed(const Eigen::MatrixXf & m, float mz_tol)
 {
-	std::set<Eigen::VectorXf> ret;
+	auto comp = [](const Eigen::VectorXf& lhs, const Eigen::VectorXf& rhs) -> bool {
+		return lhs[1] < rhs[1]; 
+	};
+	std::set<Eigen::VectorXf, mz_comp> ret(comp);
+
+	for (int i =0; i< 100; i++)
+	{
+		ret.insert(m.row(i));
+	}
+
+
+	for (auto rmv : ret)
+	{
+		cout << rmv[1] << "  ";
+	}
+
 	return ret;
 }
 
