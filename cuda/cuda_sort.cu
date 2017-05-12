@@ -43,6 +43,12 @@ void sort_by_col(Eigen::MatrixXf & m, int col)
 	}
 }
 
+std::set<Eigen::VectorXf> pic_seed(const Eigen::MatrixXf & m, float mz_tol)
+{
+	std::set<Eigen::VectorXf> ret;
+	return ret;
+}
+
 void processLCMS(LCMS & lcms)
 {
 	cudaFree(0);
@@ -52,6 +58,10 @@ void processLCMS(LCMS & lcms)
 
 	gtic();
 	sort_by_col(rmv, 2);
+	gtoc();
+
+	gtic();
+	pic_seed(rmv, 0.5);
 	gtoc();
 
 	cout << rmv.topRows(10) << endl;
