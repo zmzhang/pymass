@@ -46,23 +46,60 @@ void sort_by_col(Eigen::MatrixXf & m, int col)
 
 
 
-std::set<Eigen::VectorXf, mz_comp> pic_seed(const Eigen::MatrixXf & m, float mz_tol)
+std::set<Eigen::VectorXf, mz_comp> pic_seed(const Eigen::MatrixXf & m, float mz_tol, int num_seed)
 {
 	auto comp = [](const Eigen::VectorXf& lhs, const Eigen::VectorXf& rhs) -> bool {
 		return lhs[1] < rhs[1]; 
 	};
 	std::set<Eigen::VectorXf, mz_comp> ret(comp);
 
-	for (int i =0; i< 100; i++)
+	for (int i =0; i< m.rows(); i++)
 	{
-		ret.insert(m.row(i));
+		auto it = ret.lower_bound(m.row(i));
+		if (ret.size()==0)
+		{
+			ret.insert(m.row(i));
+		}
+		else
+		{
+			if (it == ret.end())
+			{
+				if (m.row(i)[1] - (*std::prev(ret.end()))[1] > mz_tol)
+				{
+					ret.insert(m.row(i));
+				}
+			}
+			else if (it == ret.begin())
+			{
+				if ((*ret.begin())[1] - m.row(i)[1] > mz_tol)
+				{
+					ret.insert(m.row(i));
+				}
+			}
+			else
+			{
+				if (  ((*it)[1] - m.row(i)[1] > mz_tol ) && 
+					  ( m.row(i)[1] - (*std::prev(it))[1]> mz_tol))
+				{
+					ret.insert(m.row(i));
+				}
+			}
+		}
+
+		if (ret.size()==num_seed)
+		{
+			break;
+		}
 	}
 
 
-	for (auto rmv : ret)
-	{
-		cout << rmv[1] << "  ";
-	}
+	Eigen::MatrixXf seed(ret.size(), 3);
+	int i = 0;
+	std::for_each(ret.begin(), ret.end(), [&seed, &i](const Eigen::VectorXf & v) {
+		seed.row(i) = v;
+		i++; });
+
+	cout << seed << endl;
 
 	return ret;
 }
@@ -79,10 +116,10 @@ void processLCMS(LCMS & lcms)
 	gtoc();
 
 	gtic();
-	pic_seed(rmv, 0.5);
+	pic_seed(rmv, 0.05, 50);
 	gtoc();
 
-	cout << rmv.topRows(10) << endl;
+	//cout << rmv.topRows(10) << endl;
 	cout << "##########################"<<endl;
 }
 
