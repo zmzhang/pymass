@@ -25,15 +25,15 @@ void gtoc() {
 	gtictoc_stack.pop();
 }
 
-
-void thrustSort(float *V, int *K, int N)
+void sort_by_col(Eigen::MatrixXf & m, int col)
 {
-	thrust::device_vector<float> d_V(V, V+N);
-	thrust::device_vector<int> d_K(N);
-	thrust::sequence(d_K.begin(), d_K.end(), 0, 1);
-	thrust::sort_by_key(d_V.begin(), d_V.end(), d_K.begin(), thrust::greater<float>());
-	thrust::copy(d_K.begin(), d_K.end(), K);
-	thrust::copy(d_V.begin(), d_V.end(), V);
+	for (int i = 0; i < m.cols(); i++)
+	{
+		thrust::device_vector<float> d_K(m.col(col).data(), m.col(col).data() + m.rows());
+		thrust::device_vector<float> d_V(m.col(i).data(), m.col(i).data() + m.rows());
+		thrust::sort_by_key(d_K.begin(), d_K.end(), d_V.begin(), thrust::greater<float>());
+		thrust::copy(d_V.begin(), d_V.end(), m.col(i).data());
+	}
 }
 
 void processLCMS(LCMS & lcms)
@@ -42,14 +42,12 @@ void processLCMS(LCMS & lcms)
 	cout << "using lcms object in CUDA, and its scan size is: " << lcms.m_massScans.size() << endl;
 
 	Eigen::MatrixXf rmv = lcms.getAll();
-	Eigen::VectorXi ids(rmv.rows());
+
 	gtic();
-	thrustSort(rmv.col(2).data(), ids.data(), rmv.rows());
+	sort_by_col(rmv, 2);
 	gtoc();
 
-	//cout << lcms.m_massScans[0].mz << endl;
-	cout << rmv.col(2).head(20) << endl;
+	cout << rmv.topRows(10) << endl;
 	cout << "##########################"<<endl;
-	cout << ids.head(20) << endl;
 }
 
