@@ -32,7 +32,14 @@ void sort_by_col(Eigen::MatrixXf & m, int col)
 		thrust::device_vector<float> d_K(m.col(col).data(), m.col(col).data() + m.rows());
 		thrust::device_vector<float> d_V(m.col(i).data(), m.col(i).data() + m.rows());
 		thrust::sort_by_key(d_K.begin(), d_K.end(), d_V.begin(), thrust::greater<float>());
-		thrust::copy(d_V.begin(), d_V.end(), m.col(i).data());
+		if (i!=col)
+		{
+			thrust::copy(d_V.begin(), d_V.end(), m.col(i).data());
+		}
+		if (i == m.cols())
+		{
+			thrust::copy(d_K.begin(), d_K.end(), m.col(col).data());
+		}
 	}
 }
 

@@ -4,10 +4,10 @@
 #include <stack>
 #include "LCMS.h"
 
-void thrustSort(float *V, int *K, int N);
 extern std::stack<clock_t> gtictoc_stack;
 void gtic();
 void gtoc();
+void sort_by_col(Eigen::MatrixXf & m, int col);
 
 void processLCMS(LCMS & lcms);
 
