@@ -36,7 +36,7 @@ void sort_by_col(Eigen::MatrixXf & m, int col)
 		{
 			thrust::copy(d_V.begin(), d_V.end(), m.col(i).data());
 		}
-		if (i == m.cols())
+		if (i == m.cols()-1)
 		{
 			thrust::copy(d_K.begin(), d_K.end(), m.col(col).data());
 		}
