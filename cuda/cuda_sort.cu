@@ -27,7 +27,7 @@ namespace Kernel
 
     #define HANDLE_ERROR( err ) (HandleError( err, __FILE__, __LINE__ ))
 
-	__global__ void cu_dot(Eigen::Vector3d *v1, Eigen::Vector3d *v2, double *out, size_t N)
+	__global__ void cu_dot(Eigen::Vector3f *v1, Eigen::Vector3f *v2, float *out, size_t N)
 	{
 		int idx = blockIdx.x * blockDim.x + threadIdx.x;
 		if (idx < N)
@@ -37,23 +37,23 @@ namespace Kernel
 		return;
 	}
 	
-	double dot(const std::vector<Eigen::Vector3d> & v1, const std::vector<Eigen::Vector3d> & v2)
+	double dot(const std::vector<Eigen::Vector3f> & v1, const std::vector<Eigen::Vector3f> & v2)
 	{
 		int n = v1.size();
-		double *ret = new double[n];
+		float *ret = new float[n];
 
-		Eigen::Vector3d *dev_v1, *dev_v2;
-		HANDLE_ERROR(cudaMalloc((void **)&dev_v1, sizeof(Eigen::Vector3d)*n));
-		HANDLE_ERROR(cudaMalloc((void **)&dev_v2, sizeof(Eigen::Vector3d)*n));
-		double* dev_ret;
-		HANDLE_ERROR(cudaMalloc((void **)&dev_ret, sizeof(double)*n));
+		Eigen::Vector3f *dev_v1, *dev_v2;
+		HANDLE_ERROR(cudaMalloc((void **)&dev_v1, sizeof(Eigen::Vector3f)*n));
+		HANDLE_ERROR(cudaMalloc((void **)&dev_v2, sizeof(Eigen::Vector3f)*n));
+		float* dev_ret;
+		HANDLE_ERROR(cudaMalloc((void **)&dev_ret, sizeof(float)*n));
 
-		HANDLE_ERROR(cudaMemcpy(dev_v1, v1.data(), sizeof(Eigen::Vector3d)*n, cudaMemcpyHostToDevice));
-		HANDLE_ERROR(cudaMemcpy(dev_v2, v2.data(), sizeof(Eigen::Vector3d)*n, cudaMemcpyHostToDevice));
+		HANDLE_ERROR(cudaMemcpy(dev_v1, v1.data(), sizeof(Eigen::Vector3f)*n, cudaMemcpyHostToDevice));
+		HANDLE_ERROR(cudaMemcpy(dev_v2, v2.data(), sizeof(Eigen::Vector3f)*n, cudaMemcpyHostToDevice));
 
 		cu_dot << <(n + 1023) / 1024, 1024 >> > (dev_v1, dev_v2, dev_ret, n);
 
-		HANDLE_ERROR(cudaMemcpy(ret, dev_ret, sizeof(double)*n, cudaMemcpyDeviceToHost));
+		HANDLE_ERROR(cudaMemcpy(ret, dev_ret, sizeof(float)*n, cudaMemcpyDeviceToHost));
 
 		for (int i = 1; i < n; ++i)
 		{
@@ -143,15 +143,6 @@ std::set<Eigen::VectorXf, mz_comp> pic_seed(const Eigen::MatrixXf & m, float mz_
 		}
 	}
 
-
-	Eigen::MatrixXf seed(ret.size(), 3);
-	int i = 0;
-	std::for_each(ret.begin(), ret.end(), [&seed, &i](const Eigen::VectorXf & v) {
-		seed.row(i) = v;
-		i++; });
-
-	cout << seed << endl;
-
 	return ret;
 }
 
@@ -167,14 +158,18 @@ void processLCMS(LCMS & lcms)
 	gtoc();
 
 	gtic();
-	pic_seed(rmv, 0.05, 50);
+	std::set<Eigen::VectorXf, mz_comp> pic_seed_set = pic_seed(rmv, 0.05f, 4000);
 	gtoc();
 
-	//cout << rmv.topRows(10) << endl;
+	std::vector<Eigen::Vector3f> v1(pic_seed_set.size());
+	std::vector<Eigen::Vector3f> v2(pic_seed_set.size());
+
+	int i = 0;
+	std::for_each(pic_seed_set.begin(), pic_seed_set.end(), [&v1, &v2, &i](const Eigen::VectorXf & v) {
+		v1[i] = v; v2[i] = v;
+		i++; });
 
 
-	std::vector<Eigen::Vector3d> v1(4000, Eigen::Vector3d{ 1.0, 1.0, 1.0 });
-	std::vector<Eigen::Vector3d> v2(4000, Eigen::Vector3d{ -1.0, 1.0, 1.0 });
 	gtic();
 	double x = Kernel::dot(v1, v2);
 	gtoc();
