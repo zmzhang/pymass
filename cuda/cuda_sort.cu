@@ -101,34 +101,34 @@ void sort_by_col(Eigen::MatrixXf & m, int col)
 }
 
 
-std::set<Eigen::VectorXf, mz_comp> pic_seed(const Eigen::MatrixXf & m, float mz_tol, int num_seed)
+std::vector<Eigen::Vector3f> pic_seeds(const Eigen::MatrixXf & m, float mz_tol, int num_seed)
 {
 	auto comp = [](const Eigen::VectorXf& lhs, const Eigen::VectorXf& rhs) -> bool {
 		return lhs[1] < rhs[1]; 
 	};
-	std::set<Eigen::VectorXf, mz_comp> ret(comp);
+	std::set<Eigen::VectorXf, mz_comp> seed_set(comp);
 
 	for (int i =0; i< m.rows(); i++)
 	{
-		auto it = ret.lower_bound(m.row(i));
-		if (ret.size()==0)
+		auto it = seed_set.lower_bound(m.row(i));
+		if (seed_set.size()==0)
 		{
-			ret.insert(m.row(i));
+			seed_set.insert(m.row(i));
 		}
 		else
 		{
-			if (it == ret.end())
+			if (it == seed_set.end())
 			{
-				if (m.row(i)[1] - (*std::prev(ret.end()))[1] > mz_tol)
+				if (m.row(i)[1] - (*std::prev(seed_set.end()))[1] > mz_tol)
 				{
-					ret.insert(m.row(i));
+					seed_set.insert(m.row(i));
 				}
 			}
-			else if (it == ret.begin())
+			else if (it == seed_set.begin())
 			{
-				if ((*ret.begin())[1] - m.row(i)[1] > mz_tol)
+				if ((*seed_set.begin())[1] - m.row(i)[1] > mz_tol)
 				{
-					ret.insert(m.row(i));
+					seed_set.insert(m.row(i));
 				}
 			}
 			else
@@ -136,16 +136,23 @@ std::set<Eigen::VectorXf, mz_comp> pic_seed(const Eigen::MatrixXf & m, float mz_
 				if (  ((*it)[1] - m.row(i)[1] > mz_tol ) && 
 					  ( m.row(i)[1] - (*std::prev(it))[1]> mz_tol))
 				{
-					ret.insert(m.row(i));
+					seed_set.insert(m.row(i));
 				}
 			}
 		}
 
-		if (ret.size()==num_seed)
+		if (seed_set.size()==num_seed)
 		{
 			break;
 		}
 	}
+
+	std::vector<Eigen::Vector3f> ret(seed_set.size());
+
+	int i = 0;
+	std::for_each(seed_set.begin(), seed_set.end(), [&ret, &i](const Eigen::VectorXf & v) {
+		ret[i] = v;
+		i++; });
 
 	return ret;
 }
@@ -162,20 +169,12 @@ void processLCMS(LCMS & lcms)
 	gtoc();
 
 	gtic();
-	std::set<Eigen::VectorXf, mz_comp> pic_seed_set = pic_seed(rmv, 0.05f, 4000);
+	std::vector<Eigen::Vector3f> seeds = pic_seeds(rmv, 0.05f, 4000);
 	gtoc();
 
-	std::vector<Eigen::Vector3f> v1(pic_seed_set.size());
-	std::vector<Eigen::Vector3f> v2(pic_seed_set.size());
-
-	int i = 0;
-	std::for_each(pic_seed_set.begin(), pic_seed_set.end(), [&v1, &v2, &i](const Eigen::VectorXf & v) {
-		v1[i] = v; v2[i] = v;
-		i++; });
-
-
+	
 	gtic();
-	double x = Kernel::dot(v1, v2);
+	double x = Kernel::dot(seeds, seeds);
 	gtoc();
 	cout << "Dot calculated by CUDA kernel: " << x << endl;
 
