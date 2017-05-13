@@ -7,7 +7,7 @@ Created on Sat Mar 25 22:16:48 2017
 
 
 import sys
-from _pymass import MZXML
+from _pymass import mzXMLParser
 from matplotlib.pylab import plot, show, figure
 
 
@@ -27,23 +27,19 @@ def toc():
 
 mzfile=u"mixture_bsa300fmol_n3.mzXML"
 
-mz1=MZXML()
-
-tic()
-mz1.parseFile(mzfile.encode(sys.getfilesystemencoding()))
-toc()
+parser=mzXMLParser()
 
 
+lcms = parser.parseFile(mzfile.encode(sys.getfilesystemencoding()))
 
-rt=mz1.getRT()
-bic=mz1.getBIC()
-tic=mz1.getTIC()
+
+
+
+rt=lcms.getRT()
+bic=lcms.getBIC()
+tics=lcms.getTIC()
 plot(rt,bic,'r')
-plot(rt,tic,'g')
+plot(rt,tics,'g')
 
-mz=mz1.getMS(0)
-val=mz1.getVal(0)
+rg = lcms.getRegion(700,780, 500, 501)
 
-figure()
-plot(mz,val)
-show()

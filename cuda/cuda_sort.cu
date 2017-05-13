@@ -27,7 +27,7 @@ namespace Kernel
 
     #define HANDLE_ERROR( err ) (HandleError( err, __FILE__, __LINE__ ))
 
-	__global__ void cu_dot(Eigen::Vector3f *v1, Eigen::Vector3f *v2, float *out, size_t N)
+	__global__ void finc_pics_k(Eigen::Vector3f *v1, Eigen::Vector3f *v2, float *out, size_t N)
 	{
 		int idx = blockIdx.x * blockDim.x + threadIdx.x;
 		if (idx < N)
@@ -37,7 +37,7 @@ namespace Kernel
 		return;
 	}
 	
-	double dot(const std::vector<Eigen::Vector3f> & v1, const std::vector<Eigen::Vector3f> & v2)
+	double find_pics(const std::vector<Eigen::Vector3f> & v1, const std::vector<Eigen::Vector3f> & v2)
 	{
 		int n = v1.size();
 		float *ret = new float[n];
@@ -51,7 +51,7 @@ namespace Kernel
 		HANDLE_ERROR(cudaMemcpy(dev_v1, v1.data(), sizeof(Eigen::Vector3f)*n, cudaMemcpyHostToDevice));
 		HANDLE_ERROR(cudaMemcpy(dev_v2, v2.data(), sizeof(Eigen::Vector3f)*n, cudaMemcpyHostToDevice));
 
-		cu_dot << <(n + 1023) / 1024, 1024 >> > (dev_v1, dev_v2, dev_ret, n);
+		finc_pics_k << <(n + 1023) / 1024, 1024 >> > (dev_v1, dev_v2, dev_ret, n);
 
 		HANDLE_ERROR(cudaMemcpy(ret, dev_ret, sizeof(float)*n, cudaMemcpyDeviceToHost));
 
@@ -169,12 +169,12 @@ void processLCMS(LCMS & lcms)
 	gtoc();
 
 	gtic();
-	std::vector<Eigen::Vector3f> seeds = pic_seeds(rmv, 0.05f, 4000);
+	std::vector<Eigen::Vector3f> seeds = pic_seeds(rmv, 0.05f, 40);
 	gtoc();
 
 	
 	gtic();
-	double x = Kernel::dot(seeds, seeds);
+	double x = Kernel::find_pics(seeds, seeds);
 	gtoc();
 	cout << "Dot calculated by CUDA kernel: " << x << endl;
 

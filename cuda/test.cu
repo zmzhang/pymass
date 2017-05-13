@@ -19,15 +19,5 @@ int main() {
 	
 	std::generate(h_values.begin(), h_values.end(), rand);
 
-	thrustSort(h_values.data(), h_keys.data(), h_values.size());
-
-	if (size < 100)
-	{
-		for (int i = 0; i < size; i++)
-		{
-			cout << "(" << h_values[i] << ", " << h_keys[i] << ")";
-		}
-	}
-
 	return 0;
 }
