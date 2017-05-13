@@ -82,6 +82,23 @@ void gtoc() {
 	gtictoc_stack.pop();
 }
 
+void printVV(const std::vector<Eigen::Vector3f> & vec, int n)
+{
+	Eigen::MatrixXf m(vec.size(), 3);
+	int i = 0;
+	std::for_each(vec.begin(), vec.end(), [&m, &i](const Eigen::Vector3f & v) {
+		m.row(i) = v;
+		i++; });
+	if (n<= vec.size() && n>0)
+	{
+		cout << m.topRows(n) << endl;
+	}
+	else
+	{
+		cout << m << endl;
+	}
+}
+
 void sort_by_col(Eigen::MatrixXf & m, int col)
 {
 	for (int i = 0; i < m.cols(); i++)
@@ -157,10 +174,21 @@ std::vector<Eigen::Vector3f> pic_seeds(const Eigen::MatrixXf & m, float mz_tol, 
 	return ret;
 }
 
+std::vector<std::vector<Eigen::Vector3f>> regions_of_seeds(LCMS & lcms, const std::vector<Eigen::Vector3f> & seeds, float peak_width, float mz_tol)
+{
+	std::vector<std::vector<Eigen::Vector3f>> regions;
+	for (auto seed: seeds)
+	{
+		std::vector<Eigen::Vector3f> region = lcms.getRegion(seed[0] - peak_width, seed[0] + peak_width, seed[1] - mz_tol, seed[1] + mz_tol);
+		regions.push_back(region);
+	}
+	return regions;
+}
+
 void processLCMS(LCMS & lcms)
 {
 	cudaFree(0);
-	cout << "using lcms object in CUDA, and its scan size is: " << lcms.m_massScans.size() << endl;
+	cout << "using lcms object in NVCC, and its scan size is: " << lcms.m_massScans.size() << endl;
 
 	Eigen::MatrixXf rmv = lcms.getAll();
 
@@ -169,14 +197,17 @@ void processLCMS(LCMS & lcms)
 	gtoc();
 
 	gtic();
-	std::vector<Eigen::Vector3f> seeds = pic_seeds(rmv, 0.05f, 40);
+	std::vector<Eigen::Vector3f> seeds = pic_seeds(rmv, 0.05f, 4000);
 	gtoc();
 
-	
+	gtic();
+	std::vector<std::vector<Eigen::Vector3f>> regions = regions_of_seeds(lcms, seeds, 50.0f, 0.05f);
+	gtoc();
+
 	gtic();
 	double x = Kernel::find_pics(seeds, seeds);
 	gtoc();
-	cout << "Dot calculated by CUDA kernel: " << x << endl;
+	cout << "Calculated by CUDA kernel: " << x << endl;
 
 	cout << "##########################"<<endl;
 }
