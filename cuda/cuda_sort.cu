@@ -60,6 +60,10 @@ namespace Kernel
 			ret[0] += ret[i];
 		}
 
+		cudaFree(dev_v1);
+		cudaFree(dev_v2);
+		cudaFree(dev_ret);
+
 		return ret[0];
 	}
 }
