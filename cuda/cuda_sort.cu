@@ -34,11 +34,6 @@ namespace Kernel
 		{
 			Eigen::Vector3f seed = seeds_dev[idx];
 			Eigen::Vector3f region = regions_dev[ids_dev[idx]];
-
-			printf("seed    :   %f,   %f,   %f \n", seed[0], seed[1], seed[2]);
-			printf("region 0:   %f,   %f,   %f \n", region[0], region[1], region[2]);
-			printf("region size    :   %d \n", ids_dev[idx+1] - ids_dev[idx]);
-
 		}
 		return;
 	}
@@ -120,6 +115,33 @@ void sort_by_col(Eigen::MatrixXf & m, int col)
 	}
 }
 
+#include <Eigen/Core>
+#include <algorithm>
+#include <vector>
+
+template <typename Scalar, int rows, int cols, int options, int maxRows, int maxCols>
+Eigen::Matrix<Scalar, rows, cols, options, maxRows, maxCols> sortMatrix(
+	Eigen::Matrix<Scalar, rows, cols, options, maxRows, maxCols> target, int col
+){
+	std::vector<Eigen::Matrix<Scalar, 1, cols>> matrixRows;
+	for (unsigned int i = 0; i < target.rows(); i++)
+		matrixRows.push_back(target.row(i));
+	std::sort(
+		matrixRows.begin(),
+		matrixRows.end(),
+		[&col](const Eigen::Matrix<Scalar, 1, cols> & a,const Eigen::Matrix<Scalar, 1, cols> & b)->bool
+		{
+			return a(0, col) < b(0, col);
+		}
+	);
+
+	Eigen::Matrix<Scalar, rows, cols, options, maxRows, maxCols> sorted;
+	for (unsigned int i = 0; i < matrixRows.size(); i++)
+		sorted.row(i) = matrixRows[i];
+	return sorted;
+}
+
+
 
 std::vector<Eigen::Vector3f> pic_seeds(const Eigen::MatrixXf & m, float mz_tol, int num_seed)
 {
@@ -192,10 +214,6 @@ std::tuple<std::vector<Eigen::Vector3f>, std::vector<int> > regions_of_seeds(LCM
 		rows += region.size();
 		ids[i + 1] = rows;
 
-		printf("seed    :   %f,   %f,   %f \n", seed[0], seed[1], seed[2]);
-		printf("region 0:   %f,   %f,   %f \n", region[0][0], region[0][1], region[0][2]);
-		printf("region size    :   %d \n", region.size());
-
 	}
 	std::vector<Eigen::Vector3f>              regions(rows);
 
@@ -220,7 +238,11 @@ void processLCMS(LCMS & lcms)
 	gtoc();
 
 	gtic();
-	std::vector<Eigen::Vector3f> seeds = pic_seeds(rmv, 0.05f, 4);
+	sortMatrix(rmv, 2);
+	gtoc();
+
+	gtic();
+	std::vector<Eigen::Vector3f> seeds = pic_seeds(rmv, 0.05f, 5000);
 	gtoc();
 
 	gtic();
