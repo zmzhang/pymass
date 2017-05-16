@@ -11,7 +11,7 @@ using namespace std;
 
 void LCMS::update()
 {
-	if(m_vecBIC.size()!=m_massScans.size() || m_vecRT.size()!=m_massScans.size() || m_vecTIC.size()!= m_massScans.size())
+	if (m_vecBIC.size() != m_massScans.size() || m_vecRT.size() != m_massScans.size() || m_vecTIC.size() != m_massScans.size())
 	{
 		m_vecBIC.resize(m_massScans.size());
 		m_vecTIC.resize(m_massScans.size());
