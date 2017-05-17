@@ -242,10 +242,6 @@ void processLCMS(LCMS & lcms)
 	gtoc();
 
 	gtic();
-	std::vector<Eigen::Vector3f> seeds = pic_seeds(rmv, 0.05f, 5000);
-	gtoc();
-
-	gtic();
 	std::vector<Eigen::Vector3f> regions;
 	std::vector<int>             ids;
 	std::tie(regions, ids) = regions_of_seeds(lcms, seeds, 50.0f, 0.05f);
