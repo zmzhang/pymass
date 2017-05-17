@@ -13,10 +13,10 @@ void testMZXML() {
 	{
 		mzXMLParser e;
 		tic();
-		//LCMS lcms = e.parseFile("D:/workspace/pymass/python/标2-方法5-正负离子_Seg1Ev1.mzXML");
+		LCMS lcms = e.parseFile("D:/workspace/pymass/python/标2-方法5-正负离子_Seg1Ev1.mzXML");
 		//LCMS lcms = e.parseFile("../../python/mixture_bsa300fmol_n3.mzXML");
 		//LCMS lcms = e.parseFile("../../python/detnoise_sigma3_PICKED.mzXML");
-		LCMS lcms = e.parseFile("../../python/MM14_20um.mzxml");
+		//LCMS lcms = e.parseFile("../../python/MM14_20um.mzxml");
 
 		toc();
 		//cout << lcms.getTIC().transpose() << endl;

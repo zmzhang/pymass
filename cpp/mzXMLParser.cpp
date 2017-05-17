@@ -65,7 +65,7 @@ void mzXMLParser::InitHandlers() {
 
 			if (atts.find("totIonCurrent") != atts.end())
 			{
-				scan.BIC = stof(atts["totIonCurrent"]);
+				scan.TIC = stof(atts["totIonCurrent"]);
 			}
 			else
 			{
