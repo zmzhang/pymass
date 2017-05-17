@@ -1,7 +1,6 @@
 #pragma once
 
 #include <list>
-#include "base64.h"
 #include "utils.h"
 #include "LCMS.h"
 
