@@ -47,15 +47,30 @@ void mzXMLParser::InitHandlers() {
 			map<string, string> atts = a.m_scanAttributes.back();
 			size_t nLen = atts["retentionTime"].length();
 			scan.RT = stof(atts["retentionTime"].substr(2, nLen - 3));
-			if (atts.find("basePeakIntensity") != atts.end())
-			{
-				scan.BIC = stof(atts["basePeakIntensity"]);
-			}
+
 
 			byteswap_avx2(reinterpret_cast<uint32_t*>(floatArray), nNum * 2);
 			scan.mz = Eigen::Map<Eigen::VectorXf, 0, Eigen::InnerStride<2>>(floatArray, nNum);
 			scan.val = Eigen::Map<Eigen::VectorXf, 0, Eigen::InnerStride<2>>(floatArray+1, nNum);
-			scan.TIC = scan.val.sum();
+
+			if (atts.find("basePeakIntensity") != atts.end())
+			{
+				scan.BIC = stof(atts["basePeakIntensity"]);
+			}
+			else
+			{
+				scan.BIC = scan.val.maxCoeff();
+			}
+
+			if (atts.find("totIonCurrent") != atts.end())
+			{
+				scan.TIC = stof(atts["totIonCurrent"]);
+			}
+			else
+			{
+				scan.TIC = scan.val.sum();
+			}
+			
 			delete[] raw;
 		}
 

@@ -8,7 +8,10 @@ Created on Sat Mar 25 22:16:48 2017
 
 import sys
 from _pymass import mzXMLParser
-from matplotlib.pylab import plot, show, figure
+import numpy as np
+from pylab import plot, show, figure, scatter, xlabel, ylabel
+import pylab
+from matplotlib.ticker import FormatStrFormatter
 
 
 def tic():
@@ -23,6 +26,21 @@ def toc():
         print("Elapsed time is " + str(time.time() - startTime_for_tictoc) + " seconds.")
     else:
         print("Toc: start time not set")
+
+
+def plot_region(rmv, lcms, n):
+    (rt, mz, val) = rmv[n]
+    region = lcms.getRegion(rt - 200, rt + 200, mz - 0.5, mz + 0.5)
+    rg = np.array(region).reshape((len(region), region[0].shape[0]))
+    figure()
+    scatter(rt, mz, c = 'r', marker = 'x', s = 100)
+    scatter(rg[:,0], rg[:,1], c = np.log(rg[:,2]))
+    xlabel('Retention Time(S)')
+    ylabel('M/Z')
+    ax = pylab.gca()
+    ax.yaxis.set_major_formatter(FormatStrFormatter('%.4f'))
+    show()
+
 
 
 mzfile=u"mixture_bsa300fmol_n3.mzXML"
@@ -41,5 +59,15 @@ tics=lcms.getTIC()
 plot(rt,bic,'r')
 plot(rt,tics,'g')
 
-rg = lcms.getRegion(700,780, 500, 501)
+rmv = lcms.getAll()
+tic()
+rmv_sort = rmv[rmv[:,2].argsort()[::-1],:]
+toc()
+
+plot_region(rmv_sort, lcms, 0)
+
+
+
+(rt, mz, val) = rmv[2]
+region = lcms.getRegion(rt - 100, rt + 100, mz - 0.3, mz + 0.3)
 

@@ -10,7 +10,7 @@ using namespace std;
 
 void LCMS::update()
 {
-	if(m_vecBIC.size()!=m_massScans.size() || m_vecRT.size()!=m_massScans.size() || m_vecTIC.size()!= m_massScans.size())
+	if (m_vecBIC.size() != m_massScans.size() || m_vecRT.size() != m_massScans.size() || m_vecTIC.size() != m_massScans.size())
 	{
 		m_vecBIC.resize(m_massScans.size());
 		m_vecTIC.resize(m_massScans.size());
@@ -99,14 +99,14 @@ std::vector<Eigen::Vector3f> LCMS::getRegion(float rt_begin, float rt_end, float
 	Eigen::VectorXf rts(2); rts << rt_begin, rt_end;
 	Eigen::VectorXf mzs(2); mzs << mz_begin, mz_end;
 	Eigen::VectorXi rti = findclosest(m_vecRT, rts);
-	for (int i = rti[0]; i<rti[1]; i++)
+	for (int i = rti[0]; i<=rti[1]; i++)
 	{
 		Eigen::VectorXi mzi = findclosest(m_massScans[i].mz, mzs);
 		mzi_vec.push_back(mzi);
 	}
 
 	int rows = std::accumulate(mzi_vec.begin(), mzi_vec.end(), 0, [](int s, const Eigen::VectorXi & mzi) {
-		return s + (mzi[1] - mzi[0]);
+		return s + (mzi[1] - mzi[0] + 1);
 	}); 
 
 	std::vector<Eigen::Vector3f> ret;
@@ -114,7 +114,7 @@ std::vector<Eigen::Vector3f> LCMS::getRegion(float rt_begin, float rt_end, float
 	int s = 0;
 	for (int i = 0; i<mzi_vec.size(); i++)
 	{
-		for (int j = mzi_vec[i][0]; j<mzi_vec[i][1]; j++)
+		for (int j = mzi_vec[i][0]; j<=mzi_vec[i][1]; j++)
 		{
 			ret[s][0] = m_vecRT[i + rti[0]];
 			ret[s][1] = m_massScans[i + rti[0]].mz[j];

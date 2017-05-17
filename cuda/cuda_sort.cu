@@ -34,6 +34,7 @@ namespace Kernel
 		{
 			Eigen::Vector3f seed = seeds_dev[idx];
 			Eigen::Vector3f region = regions_dev[ids_dev[idx]];
+
 		}
 		return;
 	}
@@ -213,7 +214,6 @@ std::tuple<std::vector<Eigen::Vector3f>, std::vector<int> > regions_of_seeds(LCM
 		region_vec.push_back(region);
 		rows += region.size();
 		ids[i + 1] = rows;
-
 	}
 	std::vector<Eigen::Vector3f>              regions(rows);
 
@@ -238,7 +238,7 @@ void processLCMS(LCMS & lcms)
 	gtoc();
 
 	gtic();
-	sortMatrix(rmv, 2);
+	std::vector<Eigen::Vector3f> seeds = pic_seeds(rmv, 0.05f, 8000);
 	gtoc();
 
 	gtic();
