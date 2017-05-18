@@ -28,13 +28,16 @@ def toc():
         print("Toc: start time not set")
 
 
-def plot_region(rmv, lcms, n):
+def get_region(rmv, lcms, n, width, mz_tol):
     (rt, mz, val) = rmv[n]
-    region = lcms.getRegion(rt - 200, rt + 200, mz - 0.5, mz + 0.5)
-    rg = np.array(region).reshape((len(region), region[0].shape[0]))
+    region = lcms.getRegion(rt - width, rt + width, mz - mz_tol, mz + mz_tol)
+    return np.array(region).reshape((len(region), region[0].shape[0])) 
+
+def plot_region(rg, rt = None, mz = None):
     figure()
-    scatter(rt, mz, c = 'r', marker = 'x', s = 100)
-    scatter(rg[:,0], rg[:,1], c = np.log(rg[:,2]))
+    if rt != None and mz != None:
+        scatter(rt, mz, c = 'r', marker = 'x', s = 100)
+    scatter(rg[:,0], rg[:,1], c = np.log(rg[:,2]), s = 1)
     xlabel('Retention Time(S)')
     ylabel('M/Z')
     ax = pylab.gca()
@@ -75,10 +78,7 @@ tic()
 rmv_sort = rmv[rmv[:,2].argsort()[::-1],:]
 toc()
 
-plot_region(rmv_sort, lcms, 0)
-
-
-
-(rt, mz, val) = rmv[2]
-region = lcms.getRegion(rt - 100, rt + 100, mz - 0.3, mz + 0.3)
+i = 0
+rg = get_region(rmv_sort, lcms, i, 100, 0.5)
+plot_region(rg, rmv_sort[i][0], rmv_sort[i][1])
 
