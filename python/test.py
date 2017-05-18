@@ -35,15 +35,14 @@ def get_region(rmv, lcms, n, width, mz_tol):
 
 def plot_region(rg, rt = None, mz = None):
     figure()
+    scatter(rg[:,0], rg[:,1], c = np.log(rg[:,2]), s = 1)
     if rt != None and mz != None:
         scatter(rt, mz, c = 'r', marker = 'x', s = 100)
-    scatter(rg[:,0], rg[:,1], c = np.log(rg[:,2]), s = 1)
     xlabel('Retention Time(S)')
     ylabel('M/Z')
     ax = pylab.gca()
     ax.yaxis.set_major_formatter(FormatStrFormatter('%.4f'))
     show()
-
 
 def mzdata2mzxml(path, converter = 'C:/Program Files/OpenMS/bin/FileConverter.exe'):
     files=os.listdir(path)
@@ -59,7 +58,7 @@ def find_closest(A, target):
     if len(A) == 0:
         return []
     if len(A) == 1:
-        return [0]
+        return 0
     idx = A.searchsorted(target)
     idx = np.clip(idx, 1, len(A) - 1)
     left = A[idx - 1]
@@ -89,30 +88,41 @@ lcms = parser.parseFile(mzfile.encode(sys.getfilesystemencoding()))
 rts=lcms.getRT()
 bic=lcms.getBIC()
 tics=lcms.getTIC()
-plot(rts,bic,'r')
-plot(rts,tics,'g')
+#plot(rts,bic,'r')
+#plot(rts,tics,'g')
 
 rmv = lcms.getAll()
 tic()
 rmv_sort = rmv[rmv[:,2].argsort()[::-1],:]
 toc()
 
-i = 0
+i    = 50
+width = 100
 seed = rmv_sort[i]
-rg = get_region(rmv_sort, lcms, i, 100, 0.5)
+rg   = get_region(rmv_sort, lcms, i, width, 0.5)
 plot_region(rg, rmv_sort[i][0], rmv_sort[i][1])
 
 rtm = np.mean(np.diff(rts.T))
 
-pic = []
-pic.append(find_idx(rg, seed[0], seed[1]))
+pic_ids = []
+pic_ids.append(find_idx(rg, seed[0], seed[1]))
 
+stds=[]
 
-for i in range(0,5):
-    rt_left  = rg[pic[0]][0] - rtm
-    mz_left  = rg[pic[0]][1]
-    pic.insert(0, find_idx(rg, rt_left, mz_left))
+for i in range(0,width):
+    stds.append(np.std(rg[pic_ids,1]))
+    rt_left  = rg[pic_ids[0]][0] - rtm
+    pic_ids.insert(0, find_idx(rg, rt_left, seed[1]))
     
-    rt_right = rg[pic[-1]][0] + rtm
-    mz_right = rg[pic[-1]][1]             
-    pic.append(find_idx(rg, rt_right, seed[1]))
+    rt_right = rg[pic_ids[-1]][0] + rtm          
+    pic_ids.append(find_idx(rg, rt_right, seed[1]))
+
+pic = np.array([rg[i] for i in pic_ids])
+
+plot_region(pic)
+
+figure()
+plot(pic[:,0], pic[:,2])
+
+figure()
+plot(stds)
