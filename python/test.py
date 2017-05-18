@@ -55,9 +55,8 @@ def mzdata2mzxml(path, converter = 'C:/Program Files/OpenMS/bin/FileConverter.ex
 
 
 #mzdata2mzxml('F:/resources/MTBLS188/study files/')
-
-
-mzfile=u"mixture_bsa300fmol_n3.mzXML"
+#mzfile=u"mixture_bsa300fmol_n3.mzXML"
+mzfile=u"MM14_20um.mzxml"
 
 parser=mzXMLParser()
 
