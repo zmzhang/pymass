@@ -12,7 +12,7 @@ import numpy as np
 from pylab import plot, show, figure, scatter, xlabel, ylabel
 import pylab
 from matplotlib.ticker import FormatStrFormatter
-
+import subprocess, os
 
 def tic():
     #Homemade version of matlab tic and toc functions
@@ -41,6 +41,17 @@ def plot_region(rmv, lcms, n):
     ax.yaxis.set_major_formatter(FormatStrFormatter('%.4f'))
     show()
 
+
+def mzdata2mzxml(path, converter = 'C:/Program Files/OpenMS/bin/FileConverter.exe'):
+    files=os.listdir(path)
+    for f in files:
+        if f.lower().endswith(".mzdata"): 
+            file_in  = path + f
+            file_out = path + f[0:-6] + "mzxml"
+            subprocess.Popen([converter, '-in', file_in, '-out', file_out])
+
+
+#mzdata2mzxml('F:/resources/MTBLS188/study files/')
 
 
 mzfile=u"mixture_bsa300fmol_n3.mzXML"
