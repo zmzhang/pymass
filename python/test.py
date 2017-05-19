@@ -163,9 +163,14 @@ tics=lcms.getTIC()
 
 rmv = lcms.getAll()
 tic()
-rmv_sort = rmv[rmv[:,2].argsort()[::-1],:]
+ids = rmv[:,2].argsort()[::-1]
+rmv_sort = rmv[ids,:]
+rids = ids.argsort()
 toc()
 
 seeds = pic_seeds(rmv_sort[0:10000,:])
 
 pic = FPIC(lcms, seeds[0], 100, 0.5)
+
+print(pic[0][0:3])
+print(rmv_sort[rids[int(pic[0][3])]])
