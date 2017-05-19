@@ -67,12 +67,15 @@ def find_closest(A, target):
     idx -= target - left < right - target
     return idx.tolist()
 
-def find_idx(rg, rt, mz):
+def find_idx(rg, rt, mz, threshold):
     rt =rg[find_closest(rg[:,0], rt)][0]
     idx_l = np.searchsorted(rg[:,0], rt, side='left')
     idx_u = np.searchsorted(rg[:,0], rt, side='right')
     idx = find_closest(rg[idx_l:idx_u,1], mz) + idx_l
-    return idx
+    if rg[idx,1] > mz-threshold and rg[idx,1] < mz+threshold:
+        return idx
+    else:
+        return -1
 
 
 def pic_seeds(rmv_sort, mz_tol = 0.5):
@@ -92,7 +95,53 @@ def pic_seeds(rmv_sort, mz_tol = 0.5):
                 if seed_set[idx][1] - rmv_sort[i][1] > mz_tol and \
                    rmv_sort[i][1] - seed_set[idx-1][1] > mz_tol:
                     seed_set.add(tuple(rmv_sort[i]))   
-    return np.array(seed_set) 
+    seeds = np.array(seed_set) 
+    return seeds[seeds[:,2].argsort()[::-1],:]
+
+def FPIC(lcms, seed, rt_width, mz_width, b_plot=True):
+
+    pic_ids = []
+    stds=[]
+    rg   = get_region(seed, lcms, rt_width, mz_width)
+    rtm = np.mean(np.diff(lcms.getRT().T))
+    pic_ids.append(find_idx(rg, seed[0], seed[1], sys.float_info.max))
+    b_left=True
+    b_right=True
+    for i in range(0,rt_width):
+        threshold = sys.float_info.max
+        stds.append(np.std(rg[pic_ids,1]))
+        if len(stds) >=3:
+            #pass
+            threshold = 10 * np.mean(stds[1:])
+        if b_left:
+            rt_left  = rg[pic_ids[0]][0] - rtm
+            b_left = find_idx(rg, rt_left, seed[1], threshold) 
+            if b_left != -1:
+                pic_ids.insert(0, b_left)
+            else:
+                b_left = False
+        
+        if b_right:
+            rt_right = rg[pic_ids[-1]][0] + rtm 
+            idx_r = find_idx(rg, rt_right, seed[1], threshold)
+            if idx_r != -1:
+                pic_ids.append(idx_r)
+            else:
+                b_right=False
+        
+        if b_left == False and b_right == False:
+            break;
+    pic = np.array([rg[i] for i in pic_ids])
+    
+    if b_plot:
+        plot_region(rg, seed[0], seed[1])  
+        plot_region(pic, seed[0], seed[1])
+        figure()
+        plot(pic[:,0], pic[:,2])
+        figure()
+        plot(stds)
+
+    return pic
 
 #mzdata2mzxml('F:/resources/MTBLS188/study files/')
 #mzfile=u"mixture_bsa300fmol_n3.mzXML"
@@ -117,35 +166,6 @@ tic()
 rmv_sort = rmv[rmv[:,2].argsort()[::-1],:]
 toc()
 
-seeds = pic_seeds(rmv_sort[0:1000,:])
+seeds = pic_seeds(rmv_sort[0:10000,:])
 
-i    = 1
-width = 100
-seed = seeds[i]
-rg   = get_region(seed, lcms, width, 0.5)
-plot_region(rg, seed[0], seed[1])
-
-rtm = np.mean(np.diff(rts.T))
-
-pic_ids = []
-pic_ids.append(find_idx(rg, seed[0], seed[1]))
-
-stds=[]
-
-for i in range(0,width):
-    stds.append(np.std(rg[pic_ids,1]))
-    rt_left  = rg[pic_ids[0]][0] - rtm
-    pic_ids.insert(0, find_idx(rg, rt_left, seed[1]))
-    
-    rt_right = rg[pic_ids[-1]][0] + rtm          
-    pic_ids.append(find_idx(rg, rt_right, seed[1]))
-
-pic = np.array([rg[i] for i in pic_ids])
-
-plot_region(pic)
-
-figure()
-plot(pic[:,0], pic[:,2])
-
-figure()
-plot(stds)
+pic = FPIC(lcms, seeds[0], 100, 0.5)
