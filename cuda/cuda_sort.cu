@@ -27,19 +27,19 @@ namespace Kernel
 
     #define HANDLE_ERROR( err ) (HandleError( err, __FILE__, __LINE__ ))
 
-	__global__ void find_pics_k(Eigen::Vector3f * seeds_dev, Eigen::Vector3f * regions_dev, int *ids_dev, int n)
+	__global__ void find_pics_k(Eigen::Vector3f * seeds_dev, Eigen::Vector4f * regions_dev, int *ids_dev, int n)
 	{
 		int idx = blockIdx.x * blockDim.x + threadIdx.x;
 		if (idx < n)
 		{
 			Eigen::Vector3f seed = seeds_dev[idx];
-			Eigen::Vector3f region = regions_dev[ids_dev[idx]];
+			Eigen::Vector4f region = regions_dev[ids_dev[idx]];
 
 		}
 		return;
 	}
 	
-	double find_pics(const std::vector<Eigen::Vector3f> & seeds, const std::vector<Eigen::Vector3f> & regions, const std::vector<int> & ids)
+	double find_pics(const std::vector<Eigen::Vector3f> & seeds, const std::vector<Eigen::Vector4f> & regions, const std::vector<int> & ids)
 	{
 		int sz_seed = seeds.size();
 		int sz_rg   = regions.size();
@@ -48,9 +48,9 @@ namespace Kernel
 		HANDLE_ERROR(cudaMemcpy(seeds_dev, seeds.data(), sizeof(Eigen::Vector3f)*sz_seed, cudaMemcpyHostToDevice));
 
 
-		Eigen::Vector3f * regions_dev;
-		HANDLE_ERROR(cudaMalloc((void **)&regions_dev, sizeof(Eigen::Vector3f)*sz_rg));
-		HANDLE_ERROR(cudaMemcpy(regions_dev, regions.data(), sizeof(Eigen::Vector3f)*sz_rg, cudaMemcpyHostToDevice));
+		Eigen::Vector4f * regions_dev;
+		HANDLE_ERROR(cudaMalloc((void **)&regions_dev, sizeof(Eigen::Vector4f)*sz_rg));
+		HANDLE_ERROR(cudaMemcpy(regions_dev, regions.data(), sizeof(Eigen::Vector4f)*sz_rg, cudaMemcpyHostToDevice));
 
 		int * ids_dev;
 		HANDLE_ERROR(cudaMalloc((void **)&ids_dev, sizeof(int)*(sz_seed+1)));
@@ -200,9 +200,9 @@ std::vector<Eigen::Vector3f> pic_seeds(const Eigen::MatrixXf & m, float mz_tol, 
 	return ret;
 }
 
-std::tuple<std::vector<Eigen::Vector3f>, std::vector<int> > regions_of_seeds(LCMS & lcms, const std::vector<Eigen::Vector3f> & seeds, float peak_width, float mz_tol)
+std::tuple<std::vector<Eigen::Vector4f>, std::vector<int> > regions_of_seeds(LCMS & lcms, const std::vector<Eigen::Vector3f> & seeds, float peak_width, float mz_tol)
 {
-	std::vector<std::vector<Eigen::Vector3f>> region_vec;
+	std::vector<std::vector<Eigen::Vector4f>> region_vec;
 	std::vector<int>                          ids(seeds.size()+1);
 
 	int rows = 0;
@@ -210,12 +210,12 @@ std::tuple<std::vector<Eigen::Vector3f>, std::vector<int> > regions_of_seeds(LCM
 	for (int i=0; i<seeds.size(); i++)
 	{
 		Eigen::Vector3f seed = seeds[i];
-		std::vector<Eigen::Vector3f> region = lcms.getRegion(seed[0] - peak_width, seed[0] + peak_width, seed[1] - mz_tol, seed[1] + mz_tol);
+		std::vector<Eigen::Vector4f> region = lcms.getRegion(seed[0] - peak_width, seed[0] + peak_width, seed[1] - mz_tol, seed[1] + mz_tol);
 		region_vec.push_back(region);
 		rows += region.size();
 		ids[i + 1] = rows;
 	}
-	std::vector<Eigen::Vector3f>              regions(rows);
+	std::vector<Eigen::Vector4f>              regions(rows);
 
 	for (int i = 0; i < seeds.size(); i++)
 	{
@@ -242,7 +242,7 @@ void processLCMS(LCMS & lcms)
 	gtoc();
 
 	gtic();
-	std::vector<Eigen::Vector3f> regions;
+	std::vector<Eigen::Vector4f> regions;
 	std::vector<int>             ids;
 	std::tie(regions, ids) = regions_of_seeds(lcms, seeds, 50.0f, 0.05f);
 	gtoc();

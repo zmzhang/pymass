@@ -23,7 +23,8 @@ namespace std {
    %template(StringVector) vector<string>;
    %template(ConstCharVector) vector<const char*>;
    %template(MassScanVector) vector<MassScan>;
-   %template(Vector3fVector) vector<Eigen::Vector3f>;
+   %template(VV3f) vector<Eigen::Vector3f>;
+   %template(VV4f) vector<Eigen::Vector4f>;
 }
 
 
@@ -33,6 +34,7 @@ namespace std {
 %eigen_typemaps(Eigen::MatrixXd)
 %eigen_typemaps(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>)
 %eigen_typemaps(Eigen::Vector3f)
+%eigen_typemaps(Eigen::Vector4f)
 %eigen_typemaps(Eigen::VectorXf)
 %eigen_typemaps(Eigen::MatrixXf)
 %eigen_typemaps(Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic>)

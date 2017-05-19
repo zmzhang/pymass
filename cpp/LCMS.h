@@ -43,7 +43,7 @@ public:
 	Eigen::VectorXf getTIC();
 	Eigen::VectorXf getMS(int i, int level = 1);
 	Eigen::VectorXf getVal(int i, int level = 1);
-	std::vector<Eigen::Vector3f> getRegion(float rt_begin, float rt_end, float mz_begin, float mz_end);
+	std::vector<Eigen::Vector4f> getRegion(float rt_begin, float rt_end, float mz_begin, float mz_end);
 
 
 private:

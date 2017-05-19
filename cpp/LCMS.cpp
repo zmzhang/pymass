@@ -92,7 +92,7 @@ Eigen::VectorXf LCMS::getVal(int i, int level)
 	return Eigen::VectorXf(0, 0);
 }
 
-std::vector<Eigen::Vector3f> LCMS::getRegion(float rt_begin, float rt_end, float mz_begin, float mz_end)
+std::vector<Eigen::Vector4f> LCMS::getRegion(float rt_begin, float rt_end, float mz_begin, float mz_end)
 {
 	update();
 	std::vector<Eigen::VectorXi> mzi_vec;
@@ -109,7 +109,7 @@ std::vector<Eigen::Vector3f> LCMS::getRegion(float rt_begin, float rt_end, float
 		return s + (mzi[1] - mzi[0] + 1);
 	}); 
 
-	std::vector<Eigen::Vector3f> ret;
+	std::vector<Eigen::Vector4f> ret;
 	ret.resize(rows);
 	int s = 0;
 	for (int i = 0; i<mzi_vec.size(); i++)
@@ -119,6 +119,7 @@ std::vector<Eigen::Vector3f> LCMS::getRegion(float rt_begin, float rt_end, float
 			ret[s][0] = m_vecRT[i + rti[0]];
 			ret[s][1] = m_massScans[i + rti[0]].mz[j];
 			ret[s][2] = m_massScans[i + rti[0]].val[j];
+			ret[s][3] = m_massScans[i + rti[0]].id[j];
 			s = s + 1;
 		}
 	}
