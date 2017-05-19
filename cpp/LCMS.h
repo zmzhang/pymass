@@ -16,6 +16,7 @@ struct PYMASS_EXPORT MassScan
 public:
 	Eigen::VectorXf mz;
 	Eigen::VectorXf val;
+	Eigen::VectorXf id;
 	float precursor_mz;
 	float RT;
 	float BIC;

@@ -50,8 +50,11 @@ void mzXMLParser::InitHandlers() {
 
 
 			byteswap_avx2(reinterpret_cast<uint32_t*>(floatArray), nNum * 2);
-			scan.mz = Eigen::Map<Eigen::VectorXf, 0, Eigen::InnerStride<2>>(floatArray, nNum);
+			scan.mz  = Eigen::Map<Eigen::VectorXf, 0, Eigen::InnerStride<2>>(floatArray, nNum);
 			scan.val = Eigen::Map<Eigen::VectorXf, 0, Eigen::InnerStride<2>>(floatArray+1, nNum);
+			scan.id = Eigen::VectorXf::LinSpaced(nNum, a.m_id, a.m_id + nNum - 1);
+			a.m_id = a.m_id + nNum;
+
 
 			if (atts.find("basePeakIntensity") != atts.end())
 			{
@@ -129,11 +132,14 @@ void mzXMLParser::initParser()
 	XML_SetCharacterDataHandler(parser, &mzXMLParser::characterDataHandler);
 
 	InitHandlers();
+
+	m_id = 0;
 }
 
 
 mzXMLParser::mzXMLParser() {
 	parser = NULL;
+	m_id = 0;
 }
 
 mzXMLParser::~mzXMLParser() {
