@@ -13,6 +13,7 @@ from pylab import plot, show, figure, scatter, xlabel, ylabel
 import pylab
 from matplotlib.ticker import FormatStrFormatter
 import subprocess, os
+from sortedcontainers import SortedSet 
 
 def tic():
     #Homemade version of matlab tic and toc functions
@@ -28,8 +29,8 @@ def toc():
         print("Toc: start time not set")
 
 
-def get_region(rmv, lcms, n, width, mz_tol):
-    (rt, mz, val) = rmv[n]
+def get_region(seed, lcms, width, mz_tol):
+    (rt, mz, val) = seed
     region = lcms.getRegion(rt - width, rt + width, mz - mz_tol, mz + mz_tol)
     return np.array(region).reshape((len(region), region[0].shape[0])) 
 
@@ -73,6 +74,26 @@ def find_idx(rg, rt, mz):
     idx = find_closest(rg[idx_l:idx_u,1], mz) + idx_l
     return idx
 
+
+def pic_seeds(rmv_sort, mz_tol = 0.5):
+    seed_set = SortedSet(key=lambda val: val[1])
+    for i in range(rmv_sort.shape[0]):
+        idx = seed_set.bisect_left(tuple(rmv_sort[i])) 
+        if len(seed_set) == 0:
+            seed_set.add(tuple(rmv_sort[0]))
+        else:
+            if idx == 0:
+                if seed_set[0][1] - rmv_sort[i][1] > mz_tol:
+                    seed_set.add(tuple(rmv_sort[i]))
+            elif idx == len(seed_set):
+                if rmv_sort[i][1] - seed_set[-1][1] > mz_tol:
+                    seed_set.add(tuple(rmv_sort[i]))
+            else:
+                if seed_set[idx][1] - rmv_sort[i][1] > mz_tol and \
+                   rmv_sort[i][1] - seed_set[idx-1][1] > mz_tol:
+                    seed_set.add(tuple(rmv_sort[i]))   
+    return np.array(seed_set) 
+
 #mzdata2mzxml('F:/resources/MTBLS188/study files/')
 #mzfile=u"mixture_bsa300fmol_n3.mzXML"
 mzfile=u"MM14_20um.mzxml"
@@ -96,11 +117,13 @@ tic()
 rmv_sort = rmv[rmv[:,2].argsort()[::-1],:]
 toc()
 
-i    = 50
+seeds = pic_seeds(rmv_sort[0:1000,:])
+
+i    = 1
 width = 100
-seed = rmv_sort[i]
-rg   = get_region(rmv_sort, lcms, i, width, 0.5)
-plot_region(rg, rmv_sort[i][0], rmv_sort[i][1])
+seed = seeds[i]
+rg   = get_region(seed, lcms, width, 0.5)
+plot_region(rg, seed[0], seed[1])
 
 rtm = np.mean(np.diff(rts.T))
 
