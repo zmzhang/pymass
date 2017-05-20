@@ -43,25 +43,12 @@ get_filename_component(BASE64_ABS_PATH "../thirdparty/base64SIMD" ABSOLUTE)
 include_directories("${BASE64_ABS_PATH}/include")
 link_directories("${BASE64_ABS_PATH}/lib")
 
-# find CUDA
-FIND_PACKAGE(CUDA)
-if(CUDA_FOUND)
-	message("CUDA is found.")
-	set(CUDA_NVCC_FLAGS "-Xcompiler \"/wd 4819 /wd 4244 /wd 4267\" ")
-	set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS}; -Wno-deprecated-gpu-targets)
-	set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS}; --expt-relaxed-constexpr)
-else(CUDA_FOUND)
-    message("CUDA is not installed on this system.")
-endif()
-
 
 add_definitions(-DUNICODE -D_UNICODE -D_CRT_SECURE_NO_DEPRECATE /wd4251 /wd4819 /wd4244)
 
 
 include_directories(cpp)
-include_directories(cuda)
 
 
 add_subdirectory(cpp)
 add_subdirectory(python)
-add_subdirectory(cuda)

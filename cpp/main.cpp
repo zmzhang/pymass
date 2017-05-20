@@ -2,7 +2,6 @@
 #include <fstream>
 #include "mzXMLParser.h"
 #include "utils.h"
-#include "cuda_sort.h"
 
 using namespace std;
 using namespace Eigen;
@@ -24,7 +23,6 @@ void testMZXML() {
 		//cout << lcms.getRegion(740,760,301.1,301.15) << endl;
 		Eigen::MatrixXf rmv = lcms.getAll();
 
-		processLCMS(lcms);
 
 	}
 }

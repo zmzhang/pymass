@@ -8,4 +8,4 @@ generate_export_header(pymass)
 
 add_executable(testMZXML utils.cpp LCMS.cpp mzXMLParser.cpp main.cpp )
 set_target_properties(testMZXML PROPERTIES COMPILE_FLAGS "-DPYMASS_STATIC_DEFINE")
-target_link_libraries(testMZXML ${EXPAT_LIBRARIES} base64 gsort)
+target_link_libraries(testMZXML ${EXPAT_LIBRARIES} base64)

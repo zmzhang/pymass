@@ -46,7 +46,7 @@ private:
 	std::map<std::string, std::string> currentAttributes_;
 	std::string currentElement_;
 	std::string currentText_;
-	int         m_id;
+	std::size_t m_id;
 };
 
 
