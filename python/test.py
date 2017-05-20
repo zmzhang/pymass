@@ -9,7 +9,7 @@ Created on Sat Mar 25 22:16:48 2017
 import sys
 from _pymass import mzXMLParser
 import numpy as np
-from pylab import plot, show, figure, scatter, xlabel, ylabel
+from pylab import plot, show, figure, scatter, xlabel, ylabel, hist
 import pylab
 from matplotlib.ticker import FormatStrFormatter
 import subprocess, os
@@ -174,3 +174,6 @@ pic = FPIC(lcms, seeds[0], 100, 0.5)
 
 print(pic[0][0:3])
 print(rmv_sort[rids[int(pic[0][3])]])
+
+figure()
+hist(np.log10(rmv_sort[:,2]), bins = 800)
