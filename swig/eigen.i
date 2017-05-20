@@ -72,6 +72,8 @@
     // Check data type
     else if (array_type(in) != NumPyType<typename Derived::Scalar>())
     {
+	  std::cout<<array_type(in)<<std::endl;
+	  std::cout<<NumPyType<typename Derived::Scalar>()<<std::endl;
       PyErr_SetString(PyExc_ValueError, "Type mismatch between NumPy and Eigen objects.");
       return false;
     }
@@ -216,6 +218,8 @@
   template<> int NumPyType<double>() {return NPY_DOUBLE;};
 
   template<> int NumPyType<float>() {return NPY_FLOAT;};
+  
+  template<> int NumPyType<int>() {return NPY_INT;};
 %}
 
 // ----------------------------------------------------------------------------

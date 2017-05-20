@@ -149,7 +149,7 @@ def FPIC(lcms, seed, rt_width, mz_width, b_plot=True):
 
     return pic
 
-def FPICS(lcms, min_peak=300.0, rt_width=100, mz_width=0.5):
+def FPICs(lcms, min_peak=300.0, rt_width=100, mz_width=0.5):
     rmv      = lcms.getAll()
     ids      = rmv[:,2].argsort()[::-1]
     rmv_sort = rmv[ids,:]
@@ -188,7 +188,7 @@ tics=lcms.getTIC()
 #plot(rts,bic,'r')
 #plot(rts,tics,'g')
 
-pics = FPICS(lcms)
+pics = FPICs(lcms)
 
 
 figure()

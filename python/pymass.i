@@ -18,6 +18,7 @@
 
 
 namespace std {
+   %template(BoolVector) vector<bool>;
    %template(IntVector) vector<int>;
    %template(DoubleVector) vector<double>;
    %template(StringVector) vector<string>;
@@ -38,6 +39,8 @@ namespace std {
 %eigen_typemaps(Eigen::VectorXf)
 %eigen_typemaps(Eigen::MatrixXf)
 %eigen_typemaps(Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic>)
+%eigen_typemaps(Eigen::VectorXi)
+%eigen_typemaps(Eigen::Matrix<int, Eigen::Dynamic, 1>)
 
 
 

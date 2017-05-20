@@ -45,5 +45,7 @@ int main(int argc, const char * argv[]) {
 	testMZXML();  
 	//testFindClosest();
 
+	cout << "size of int is: " << sizeof(int) << endl;
+
     return 0;
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <list>
+#include <set>
 #include "utils.h"
 #include "LCMS.h"
 
@@ -123,6 +124,61 @@ std::vector<Eigen::Vector4f> LCMS::getRegion(float rt_begin, float rt_end, float
 			s = s + 1;
 		}
 	}
+
+	return ret;
+}
+
+std::vector<Eigen::Vector3f> pic_seeds(const Eigen::MatrixXf & m, const int & idx , const Eigen::VectorXi  & b_inc, float mz_tol)
+{
+	auto comp = [](const Eigen::VectorXf& lhs, const Eigen::VectorXf& rhs) -> bool {
+		return lhs[1] < rhs[1];
+	};
+	std::set<Eigen::VectorXf, mz_comp> seed_set(comp);
+
+	for (int i = 0; i < idx; i++)
+	{
+		if (b_inc[i] == 1)
+		{
+			continue;
+		}
+		auto it = seed_set.lower_bound(m.row(i));
+		if (seed_set.size() == 0)
+		{
+			seed_set.insert(m.row(i));
+		}
+		else
+		{
+			if (it == seed_set.end())
+			{
+				if (m.row(i)[1] - (*std::prev(seed_set.end()))[1] > mz_tol)
+				{
+					seed_set.insert(m.row(i));
+				}
+			}
+			else if (it == seed_set.begin())
+			{
+				if ((*seed_set.begin())[1] - m.row(i)[1] > mz_tol)
+				{
+					seed_set.insert(m.row(i));
+				}
+			}
+			else
+			{
+				if (((*it)[1] - m.row(i)[1] >= mz_tol) &&
+					(m.row(i)[1] - (*std::prev(it))[1] >= mz_tol))
+				{
+					seed_set.insert(m.row(i));
+				}
+			}
+		}
+	}
+
+	std::vector<Eigen::Vector3f> ret(seed_set.size());
+
+	int i = 0;
+	std::for_each(seed_set.begin(), seed_set.end(), [&ret, &i](const Eigen::VectorXf & v) {
+		ret[i] = v;
+		i++; });
 
 	return ret;
 }
