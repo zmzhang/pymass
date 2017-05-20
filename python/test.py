@@ -78,12 +78,14 @@ def find_idx(rg, rt, mz, threshold):
         return -1
 
 
-def pic_seeds(rmv_sort, mz_tol = 0.5):
+def pic_seeds(rmv_sort, idx, b_inc, mz_tol = 0.5):
     seed_set = SortedSet(key=lambda val: val[1])
-    for i in range(rmv_sort.shape[0]):
+    for i in range(idx):
+        if b_inc[i] == True:
+            continue
         idx = seed_set.bisect_left(tuple(rmv_sort[i])) 
         if len(seed_set) == 0:
-            seed_set.add(tuple(rmv_sort[0]))
+            seed_set.add(tuple(rmv_sort[i]))
         else:
             if idx == 0:
                 if seed_set[0][1] - rmv_sort[i][1] > mz_tol:
@@ -92,16 +94,20 @@ def pic_seeds(rmv_sort, mz_tol = 0.5):
                 if rmv_sort[i][1] - seed_set[-1][1] > mz_tol:
                     seed_set.add(tuple(rmv_sort[i]))
             else:
-                if seed_set[idx][1] - rmv_sort[i][1] > mz_tol and \
-                   rmv_sort[i][1] - seed_set[idx-1][1] > mz_tol:
+                if seed_set[idx][1] - rmv_sort[i][1] >= mz_tol and \
+                   rmv_sort[i][1] - seed_set[idx-1][1] >= mz_tol:
                     seed_set.add(tuple(rmv_sort[i]))   
     seeds = np.array(seed_set) 
-    return seeds[seeds[:,2].argsort()[::-1],:]
+    if seeds.shape[0] >0:
+        return seeds[seeds[:,2].argsort()[::-1],:]
+    else:
+        return []
 
 def FPIC(lcms, seed, rt_width, mz_width, b_plot=True):
 
     pic_ids = []
-    stds=[]
+    if b_plot:
+        stds=[]
     rg   = get_region(seed, lcms, rt_width, mz_width)
     rtm = np.mean(np.diff(lcms.getRT().T))
     pic_ids.append(find_idx(rg, seed[0], seed[1], sys.float_info.max))
@@ -109,10 +115,10 @@ def FPIC(lcms, seed, rt_width, mz_width, b_plot=True):
     b_right=True
     for i in range(0,rt_width):
         threshold = sys.float_info.max
-        stds.append(np.std(rg[pic_ids,1]))
-        if len(stds) >=3:
-            #pass
-            threshold = 10 * np.mean(stds[1:])
+        if b_plot:
+            stds.append(np.std(rg[pic_ids,1]))
+        if len(pic_ids) == 5:   
+            threshold = 10 * np.mean(np.std(rg[pic_ids,1]))
         if b_left:
             rt_left  = rg[pic_ids[0]][0] - rtm
             b_left = find_idx(rg, rt_left, seed[1], threshold) 
@@ -143,6 +149,27 @@ def FPIC(lcms, seed, rt_width, mz_width, b_plot=True):
 
     return pic
 
+def FPICS(lcms, min_peak=300.0, rt_width=100, mz_width=0.5):
+    rmv      = lcms.getAll()
+    ids      = rmv[:,2].argsort()[::-1]
+    rmv_sort = rmv[ids,:]
+    rids     = ids.argsort()
+    idx      = rmv_sort.shape[0] - rmv_sort[::-1,2].searchsorted(min_peak)
+    b_inc    = np.full((rmv.shape[0],), False, dtype=bool)
+    
+    pics=[]
+    
+    while not(np.all(b_inc[0:idx])):
+        print(np.sum(b_inc[0:idx])/idx)
+        seeds = pic_seeds(rmv_sort, idx, b_inc)
+        
+        for seed in seeds:
+            pic = FPIC(lcms, seed, rt_width, mz_width, False)
+            b_inc[rids[pic[:,3].astype(int)]] = True
+            pics.append(pic)
+
+    return pics
+
 #mzdata2mzxml('F:/resources/MTBLS188/study files/')
 #mzfile=u"mixture_bsa300fmol_n3.mzXML"
 mzfile=u"MM14_20um.mzxml"
@@ -161,19 +188,11 @@ tics=lcms.getTIC()
 #plot(rts,bic,'r')
 #plot(rts,tics,'g')
 
-rmv = lcms.getAll()
-tic()
-ids = rmv[:,2].argsort()[::-1]
-rmv_sort = rmv[ids,:]
-rids = ids.argsort()
-toc()
+pics = FPICS(lcms)
 
-seeds = pic_seeds(rmv_sort[0:10000,:])
-
-pic = FPIC(lcms, seeds[0], 100, 0.5)
-
-print(pic[0][0:3])
-print(rmv_sort[rids[int(pic[0][3])]])
 
 figure()
+rmv      = lcms.getAll()
+ids      = rmv[:,2].argsort()[::-1]
+rmv_sort = rmv[ids,:]
 hist(np.log10(rmv_sort[:,2]), bins = 800)
