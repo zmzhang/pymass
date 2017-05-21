@@ -113,17 +113,17 @@ def FPIC(lcms, seed, rt_width, mz_width, b_plot=True):
     pic_ids.append(find_idx(rg, seed[0], seed[1], sys.float_info.max))
     b_left=True
     b_right=True
+    threshold = sys.float_info.max
     for i in range(0,rt_width):
-        threshold = sys.float_info.max
         if b_plot:
             stds.append(np.std(rg[pic_ids,1]))
-        if len(pic_ids) == 5:   
-            threshold = 10 * np.mean(np.std(rg[pic_ids,1]))
+        if len(pic_ids) == 5:  
+            threshold = 10 * np.std(rg[pic_ids,1])
         if b_left:
             rt_left  = rg[pic_ids[0]][0] - rtm
             idx_left = find_idx(rg, rt_left, seed[1], threshold) 
             if idx_left != -1:
-                pic_ids.insert(0, b_left)
+                pic_ids.insert(0, idx_left)
             else:
                 b_left = False
         

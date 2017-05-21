@@ -130,7 +130,6 @@ std::vector<Eigen::Vector4f> LCMS::getRegion(float rt_begin, float rt_end, float
 
 std::vector<Eigen::Vector3f> pic_seeds(const Eigen::MatrixXf & m, const int & idx , const Eigen::VectorXi  & b_inc, float mz_tol)
 {
-	tic();
 	auto comp = [](const Eigen::VectorXf& lhs, const Eigen::VectorXf& rhs) -> bool {
 		return lhs[1] < rhs[1];
 	};
@@ -180,7 +179,6 @@ std::vector<Eigen::Vector3f> pic_seeds(const Eigen::MatrixXf & m, const int & id
 	std::for_each(seed_set.begin(), seed_set.end(), [&ret, &i](const Eigen::VectorXf & v) {
 		ret[i] = v;
 		i++; });
-	toc();
 	return ret;
 }
 
@@ -198,13 +196,13 @@ inline int find_closest(const std::vector<Eigen::Vector4f>& rg, const int & l, c
 		return u - 1;
 	}
 
-	if (abs((*lower)[col] - v) < abs((*(--lower))[col] - v))
+	if (abs((*lower)[col] - v) < abs((*std::prev(lower))[col] - v))
 	{
-		return lower - rg.begin() + 1;
+		return lower - rg.begin();
 	}
 	else
 	{
-		return lower - rg.begin();
+		return lower - rg.begin() - 1;
 	}
 }
 
@@ -292,6 +290,5 @@ Eigen::MatrixXf FPIC(LCMS & lcms, const Eigen::Vector3f & seed, float rt_width, 
 		ret.row(idx) = rg[i];
 		return idx + 1;
 	});
-
 	return ret;
 }
