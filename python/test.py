@@ -151,9 +151,9 @@ def FPIC(lcms, seed, rt_width, mz_width, b_plot=True):
 
 def FPICs(lcms, min_peak=300.0, rt_width=100, mz_width=0.5):
     rmv      = lcms.getAll()
-    ids      = rmv[:,2].argsort()[::-1]
+    ids      = rmv.shape[0] - rmv[::-1,2].argsort(kind='mergesort')[::-1] -1
     rmv_sort = rmv[ids,:]
-    rids     = ids.argsort()
+    rids     = ids.argsort(kind='mergesort')
     idx      = rmv_sort.shape[0] - rmv_sort[::-1,2].searchsorted(min_peak)
     b_inc    = np.full((rmv.shape[0],), False, dtype=bool)
     
