@@ -130,6 +130,7 @@ std::vector<Eigen::Vector4f> LCMS::getRegion(float rt_begin, float rt_end, float
 
 std::vector<Eigen::Vector3f> pic_seeds(const Eigen::MatrixXf & m, const int & idx , const Eigen::VectorXi  & b_inc, float mz_tol)
 {
+	tic();
 	auto comp = [](const Eigen::VectorXf& lhs, const Eigen::VectorXf& rhs) -> bool {
 		return lhs[1] < rhs[1];
 	};
@@ -179,6 +180,46 @@ std::vector<Eigen::Vector3f> pic_seeds(const Eigen::MatrixXf & m, const int & id
 	std::for_each(seed_set.begin(), seed_set.end(), [&ret, &i](const Eigen::VectorXf & v) {
 		ret[i] = v;
 		i++; });
+	toc();
+	return ret;
+}
+
+inline int find_closest(const std::vector<Eigen::Vector4f>& rg, const int & l, const int & u, const float & v, const int & col)
+{
+	auto lower = std::lower_bound(rg.begin() + l, rg.begin() + u, v, [&col](const Eigen::Vector4f & v1, const float& v2) -> bool {
+		return v1[col] < v2; });
+
+	if (lower == rg.begin() + l)
+	{
+		return l;
+	}
+	if (lower == rg.begin() + u)
+	{
+		return u - 1;
+	}
+
+	if (abs((*lower)[col] - v) < abs((*(--lower))[col] - v))
+	{
+		return lower - rg.begin() + 1;
+	}
+	else
+	{
+		return lower - rg.begin();
+	}
+}
+
+inline int find_idx(const std::vector<Eigen::Vector4f>& rg, const float & rt, const float & mz, float threshold)
+{
+	return -1;
+}
+
+Eigen::MatrixXf FPIC(LCMS & lcms, const Eigen::Vector3f & seed, float rt_width, float mz_width)
+{
+	Eigen::MatrixXf ret;
+	std::vector<Eigen::Vector4f> rg = lcms.getRegion(seed[0] - rt_width, seed[0] + rt_width, seed[1] - mz_width, seed[1] + mz_width);
+	Eigen::VectorXf rts = lcms.getRT();
+	float rt_gap = (lcms.getRT().segment(1, rts.size() - 1) - lcms.getRT().segment(0, rts.size() - 1)).mean();
+	
 
 	return ret;
 }

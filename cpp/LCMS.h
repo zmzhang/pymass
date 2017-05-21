@@ -10,10 +10,6 @@
 #include <Eigen/Core>
 #include "pymass_export.h"
 
-typedef std::function<bool(const Eigen::VectorXf &lhs, const Eigen::VectorXf &rhs)> mz_comp;
-std::vector<Eigen::Vector3f> PYMASS_EXPORT pic_seeds(const Eigen::MatrixXf & m, const int & idx, const Eigen::VectorXi & b_inc, float mz_tol);
-
-
 struct PYMASS_EXPORT MassScan
 {
 public:
@@ -53,4 +49,36 @@ private:
 	void update();
 
 };
+
+
+#include <Eigen/Core>
+#include <algorithm>
+#include <vector>
+
+template <typename Scalar, int rows, int cols, int options, int maxRows, int maxCols>
+Eigen::Matrix<Scalar, rows, cols, options, maxRows, maxCols> sort_by_col(
+	Eigen::Matrix<Scalar, rows, cols, options, maxRows, maxCols> target, int col
+) {
+	std::vector<Eigen::Matrix<Scalar, 1, cols>> matrixRows;
+	for (unsigned int i = 0; i < target.rows(); i++)
+		matrixRows.push_back(target.row(i));
+	std::sort(
+		matrixRows.begin(),
+		matrixRows.end(),
+		[&col](const Eigen::Matrix<Scalar, 1, cols> & a, const Eigen::Matrix<Scalar, 1, cols> & b)->bool
+	{
+		return a(0, col) > b(0, col);
+	}
+	);
+
+	Eigen::Matrix<Scalar, rows, cols, options, maxRows, maxCols> sorted;
+	sorted.resize(target.rows(), target.cols());
+	for (unsigned int i = 0; i < matrixRows.size(); i++)
+		sorted.row(i) = matrixRows[i];
+	return sorted;
+}
+
+typedef std::function<bool(const Eigen::VectorXf &lhs, const Eigen::VectorXf &rhs)> mz_comp;
+std::vector<Eigen::Vector3f> PYMASS_EXPORT pic_seeds(const Eigen::MatrixXf & m, const int & idx, const Eigen::VectorXi & b_inc, float mz_tol);
+Eigen::MatrixXf FPIC(LCMS & lcms, const Eigen::Vector3f & seed, float rt_width, float mz_width);
 
