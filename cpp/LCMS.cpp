@@ -232,10 +232,8 @@ inline int find_idx(const std::vector<Eigen::Vector4f>& rg, const float & rt, co
 Eigen::MatrixXf FPIC(LCMS & lcms, const Eigen::Vector3f & seed, float rt_width, float mz_width)
 {
 	std::vector<Eigen::Vector4f> rg = lcms.getRegion(seed[0] - rt_width, seed[0] + rt_width, seed[1] - mz_width, seed[1] + mz_width);
-	cout<<rg.size()<<endl;
 	Eigen::VectorXf rts = lcms.getRT();
 	float rt_gap = (lcms.getRT().segment(1, rts.size() - 1) - lcms.getRT().segment(0, rts.size() - 1)).mean();
-	cout << rt_gap << endl;
 
 
 	std::list<int>  pic_ids;
@@ -252,17 +250,12 @@ Eigen::MatrixXf FPIC(LCMS & lcms, const Eigen::Vector3f & seed, float rt_width, 
 				return rg[i][1];
 			});
 			threshold =10 * sqrt((mzs.array() - mzs.mean()).pow(2).sum()/mzs.size());
-			cout << threshold << endl;
 		}
 
 		if (b_left)
 		{
 			float rt_left = rg[pic_ids.front()][0] - rt_gap;
 			int idx_left = find_idx(rg, rt_left, seed[1], threshold);
-			if (idx_left == 823)
-			{
-				cout << "" << endl;
-			}
 			if (idx_left != -1)
 			{
 				pic_ids.push_front(idx_left);
@@ -290,7 +283,6 @@ Eigen::MatrixXf FPIC(LCMS & lcms, const Eigen::Vector3f & seed, float rt_width, 
 		{
 			break;
 		}
-		cout << pic_ids.front() << "    " << pic_ids.back() << endl;
 	}
 
 	Eigen::MatrixXf ret(pic_ids.size(), 4);
