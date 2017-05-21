@@ -121,8 +121,8 @@ def FPIC(lcms, seed, rt_width, mz_width, b_plot=True):
             threshold = 10 * np.mean(np.std(rg[pic_ids,1]))
         if b_left:
             rt_left  = rg[pic_ids[0]][0] - rtm
-            b_left = find_idx(rg, rt_left, seed[1], threshold) 
-            if b_left != -1:
+            idx_left = find_idx(rg, rt_left, seed[1], threshold) 
+            if idx_left != -1:
                 pic_ids.insert(0, b_left)
             else:
                 b_left = False

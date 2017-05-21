@@ -80,5 +80,5 @@ Eigen::Matrix<Scalar, rows, cols, options, maxRows, maxCols> sort_by_col(
 
 typedef std::function<bool(const Eigen::VectorXf &lhs, const Eigen::VectorXf &rhs)> mz_comp;
 std::vector<Eigen::Vector3f> PYMASS_EXPORT pic_seeds(const Eigen::MatrixXf & m, const int & idx, const Eigen::VectorXi & b_inc, float mz_tol);
-Eigen::MatrixXf FPIC(LCMS & lcms, const Eigen::Vector3f & seed, float rt_width, float mz_width);
+Eigen::MatrixXf PYMASS_EXPORT FPIC(LCMS & lcms, const Eigen::Vector3f & seed, float rt_width, float mz_width);
 

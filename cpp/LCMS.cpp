@@ -213,10 +213,10 @@ inline int find_idx(const std::vector<Eigen::Vector4f>& rg, const float & rt, co
 	float _rt = rg[find_closest(rg, 0, (int)rg.size(), rt, 0)][0];
 
 	int lower = std::lower_bound(rg.begin() , rg.end(), _rt, [](const Eigen::Vector4f & v1, const float& v2) -> bool {
-		return v1[0] < v2; }) -rg.begin() + 1;
+		return v1[0] < v2; }) -rg.begin();
 
 	int upper = std::upper_bound(rg.begin(), rg.end(), _rt, [](const float& v2, const Eigen::Vector4f & v1) -> bool {
-		return v1[0] > v2; }) - rg.begin() + 1;
+		return v1[0] > v2; }) - rg.begin();
 	
 	int idx = find_closest(rg, lower, upper, mz, 1);
 	if (rg[idx][1] > mz - threshold && rg[idx][1] < mz + threshold)
@@ -231,14 +231,75 @@ inline int find_idx(const std::vector<Eigen::Vector4f>& rg, const float & rt, co
 
 Eigen::MatrixXf FPIC(LCMS & lcms, const Eigen::Vector3f & seed, float rt_width, float mz_width)
 {
-	Eigen::MatrixXf ret;
 	std::vector<Eigen::Vector4f> rg = lcms.getRegion(seed[0] - rt_width, seed[0] + rt_width, seed[1] - mz_width, seed[1] + mz_width);
+	cout<<rg.size()<<endl;
 	Eigen::VectorXf rts = lcms.getRT();
 	float rt_gap = (lcms.getRT().segment(1, rts.size() - 1) - lcms.getRT().segment(0, rts.size() - 1)).mean();
-	int i = find_idx(rg, seed[0], seed[1], std::numeric_limits<float>::max());
-	cout << seed.transpose() << endl;
-	cout << "idx = " << i << endl;
-	cout << rg[i].transpose() << endl;
+	cout << rt_gap << endl;
+
+
+	std::list<int>  pic_ids;
+	bool b_left = true, b_right = true;
+	pic_ids.push_back(find_idx(rg, seed[0], seed[1], std::numeric_limits<float>::max()));
+
+	float threshold = std::numeric_limits<float>::max();
+	for (int i = 0; i< int(rt_width); i++)
+	{
+		if (pic_ids.size()==5)
+		{
+			Eigen::VectorXf mzs(pic_ids.size());
+			std::transform(pic_ids.begin(), pic_ids.end(), mzs.data(), [&rg](const int & i) {
+				return rg[i][1];
+			});
+			threshold =10 * sqrt((mzs.array() - mzs.mean()).pow(2).sum()/mzs.size());
+			cout << threshold << endl;
+		}
+
+		if (b_left)
+		{
+			float rt_left = rg[pic_ids.front()][0] - rt_gap;
+			int idx_left = find_idx(rg, rt_left, seed[1], threshold);
+			if (idx_left == 823)
+			{
+				cout << "" << endl;
+			}
+			if (idx_left != -1)
+			{
+				pic_ids.push_front(idx_left);
+			}
+			else
+			{
+				b_left = false;
+			}
+		}
+
+		if (b_right)
+		{
+			float rt_right = rg[pic_ids.back()][0] + rt_gap;
+			int idx_right = find_idx(rg, rt_right, seed[1], threshold);
+			if (idx_right != -1)
+			{
+				pic_ids.push_back(idx_right);
+			}
+			else
+			{
+				b_right = false;
+			}
+		}
+		if (!b_left && !b_right)
+		{
+			break;
+		}
+		cout << pic_ids.front() << "    " << pic_ids.back() << endl;
+	}
+
+	Eigen::MatrixXf ret(pic_ids.size(), 4);
+
+
+	std::accumulate(pic_ids.begin(), pic_ids.end(), 0, [&ret, &rg](int idx, const int & i) -> int {
+		ret.row(idx) = rg[i];
+		return idx + 1;
+	});
 
 	return ret;
 }
