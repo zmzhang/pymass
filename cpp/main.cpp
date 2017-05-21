@@ -29,6 +29,9 @@ void testMZXML() {
 
 		FPIC(lcms, rmv_sort.row(0), 100, 0.5);
 
+		cout << rmv_sort.topRows(10) << endl;
+		cout << rmv_sort.bottomRows(10) << endl;
+
 
 	}
 }

@@ -292,3 +292,53 @@ Eigen::MatrixXf FPIC(LCMS & lcms, const Eigen::Vector3f & seed, float rt_width, 
 	});
 	return ret;
 }
+
+Eigen::MatrixXf sort_by_col(const Eigen::MatrixXf & target, int col)
+{
+	std::vector<Eigen::VectorXf> matrixRows;
+	for (unsigned int i = 0; i < target.rows(); i++)
+	{
+		Eigen::VectorXf vec(target.cols() + 2);
+		for (unsigned int j = 0; j < target.cols(); j++)
+		{
+			vec[j] = target(i,j);
+		}
+		vec[target.cols()] = i;
+		matrixRows.push_back(vec);
+	}
+
+	std::stable_sort(
+		matrixRows.begin(),
+		matrixRows.end(),
+		[&col](const Eigen::VectorXf & a, const Eigen::VectorXf & b)->bool
+	{
+		return a(col) > b(col);
+	}
+	);
+
+	std::vector<int> ids(matrixRows.size());
+	std::iota(ids.begin(), ids.end(), 0);
+
+	std::stable_sort(ids.begin(), ids.end(), [&matrixRows, &target](const int & i1, const int & i2) {
+		return matrixRows[i1][target.cols()] < matrixRows[i2][target.cols()];
+	});
+
+	Eigen::MatrixXf sorted;
+	sorted.resize(target.rows(), target.cols() + 2);
+	for (unsigned int i = 0; i < matrixRows.size(); i++)
+	{
+		sorted.row(i) = matrixRows[i];
+		sorted.row(i)[target.cols() + 1] = ids[i];
+	}
+	return sorted;
+}
+
+Eigen::MatrixXf FPICs(LCMS & lcms, float min_peak, float rt_width, float mz_width)
+{
+
+	Eigen::MatrixXf rmv = lcms.getAll();
+
+
+	Eigen::MatrixXf ret;
+	return ret;
+}
