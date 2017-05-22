@@ -295,26 +295,31 @@ Eigen::MatrixXf FPIC(LCMS & lcms, const Eigen::Vector3f & seed, float rt_width, 
 	return ret;
 }
 
+#include "parallel_stable_sort.h"
 Eigen::MatrixXf sort_by_col(const Eigen::MatrixXf & target, int col)
 {
 	std::vector<int> ids(target.rows());
 	std::iota(ids.begin(), ids.end(), 0);
 
-	std::stable_sort(
+	tic();
+	pss::parallel_stable_sort(
 		ids.begin(),
 		ids.end(),
-		[col, target](const int & i1, const int & i2)->bool
+		[&col, &target](const int & i1, const int & i2)->bool
 	{
 		return target(i1,col) > target(i2,col);
 	}
 	);
+	toc();
 
 	std::vector<int> rids(target.rows());
 	std::iota(rids.begin(), rids.end(), 0);
 
-	std::stable_sort(rids.begin(), rids.end(), [ids](const int & i1, const int & i2) {
+	tic();
+	pss::parallel_stable_sort(rids.begin(), rids.end(), [&ids](const int & i1, const int & i2) {
 		return ids[i1] < ids[i2];
 	});
+	toc();
 
 	Eigen::MatrixXf sorted;
 	sorted.resize(target.rows(), target.cols() + 2);
@@ -324,6 +329,7 @@ Eigen::MatrixXf sort_by_col(const Eigen::MatrixXf & target, int col)
 		sorted.row(i)[target.cols()] = ids[i];
 		sorted.row(i)[target.cols() + 1] = rids[i];
 	}
+
 	return sorted;
 }
 
@@ -331,7 +337,9 @@ std::vector<Eigen::MatrixXf> FPICs(LCMS & lcms, float min_peak, float rt_width, 
 {
 
 	Eigen::MatrixXf rmv = lcms.getAll();
+	tic();
 	Eigen::MatrixXf rmv_sort = sort_by_col(rmv, 2);
+	toc();
 	int idx = std::upper_bound(rmv_sort.col(2).data(), rmv_sort.col(2).data() + rmv_sort.rows(), min_peak,
 		[](const float & a, const float & b)->bool
 		{

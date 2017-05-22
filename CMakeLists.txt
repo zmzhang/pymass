@@ -8,6 +8,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}  "../thirdparty/eigen")
 set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}  "../thirdparty/expat")
 set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}  "../thirdparty/boost")
+set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}  "../thirdparty/tbb")
 
 # find eigen library
 find_package( Eigen3 )
@@ -42,6 +43,9 @@ endif()
 get_filename_component(BASE64_ABS_PATH "../thirdparty/base64SIMD" ABSOLUTE)
 include_directories("${BASE64_ABS_PATH}/include")
 link_directories("${BASE64_ABS_PATH}/lib")
+
+# find tbb
+find_package(tbb) 
 
 
 add_definitions(-DUNICODE -D_UNICODE -D_CRT_SECURE_NO_DEPRECATE /wd4251 /wd4819 /wd4244)

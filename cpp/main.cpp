@@ -16,18 +16,21 @@ void testMZXML() {
 		//LCMS lcms = e.parseFile("../../python/mixture_bsa300fmol_n3.mzXML");
 		//LCMS lcms = e.parseFile("../../python/detnoise_sigma3_PICKED.mzXML");
 		LCMS lcms = e.parseFile("../../python/MM14_20um.mzxml");
+		//LCMS lcms = e.parseFile("../../python/Sol_Seed_Leaf_0_0_100_1-A,2_01_2431.mzxml");
 
 		toc();
 		//cout << lcms.getTIC().transpose() << endl;
 		//cout << lcms.getRT().transpose() << endl;
 		//cout << lcms.getRegion(740,760,301.1,301.15) << endl;
-		Eigen::MatrixXf rmv = lcms.getAll();
+		//Eigen::MatrixXf rmv = lcms.getAll();
 
 		//Eigen::MatrixXf rmv_sort = sort_by_col(rmv, 2);
 		//FPIC(lcms, rmv_sort.row(0), 100, 0.5);
 
-		FPICs(lcms, 300.0, 100, 0.5);
-
+		tic();
+		std::vector<Eigen::MatrixXf> pics = FPICs(lcms, 300.0, 100, 0.5);
+		cout << "No. of PICs = " << pics.size() << endl;
+		toc();
 	}
 }
 
