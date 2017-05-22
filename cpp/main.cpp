@@ -23,15 +23,10 @@ void testMZXML() {
 		//cout << lcms.getRegion(740,760,301.1,301.15) << endl;
 		Eigen::MatrixXf rmv = lcms.getAll();
 
-		tic();
-		Eigen::MatrixXf rmv_sort = sort_by_col(rmv, 2);
-		toc();
+		//Eigen::MatrixXf rmv_sort = sort_by_col(rmv, 2);
+		//FPIC(lcms, rmv_sort.row(0), 100, 0.5);
 
-		FPIC(lcms, rmv_sort.row(0), 100, 0.5);
-
-		cout << rmv_sort.topRows(10) << endl;
-		cout << rmv_sort.bottomRows(10) << endl;
-
+		FPICs(lcms, 300.0, 100, 0.5);
 
 	}
 }

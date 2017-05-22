@@ -177,7 +177,9 @@ std::vector<Eigen::Vector3f> pic_seeds(const Eigen::MatrixXf & m, const int & id
 
 	int i = 0;
 	std::for_each(seed_set.begin(), seed_set.end(), [&ret, &i](const Eigen::VectorXf & v) {
-		ret[i] = v;
+		ret[i][0] = v[0];
+		ret[i][1] = v[1];
+		ret[i][2] = v[3];
 		i++; });
 	return ret;
 }
@@ -333,12 +335,36 @@ Eigen::MatrixXf sort_by_col(const Eigen::MatrixXf & target, int col)
 	return sorted;
 }
 
-Eigen::MatrixXf FPICs(LCMS & lcms, float min_peak, float rt_width, float mz_width)
+std::vector<Eigen::MatrixXf> FPICs(LCMS & lcms, float min_peak, float rt_width, float mz_width)
 {
 
 	Eigen::MatrixXf rmv = lcms.getAll();
+	Eigen::MatrixXf rmv_sort = sort_by_col(rmv, 2);
+	int idx = std::upper_bound(rmv_sort.col(2).data(), rmv_sort.col(2).data() + rmv_sort.rows(), min_peak,
+		[](const float & a, const float & b)->bool
+		{
+			return a > b;
+		}) - rmv_sort.col(2).data();
+	Eigen::VectorXi b_inc(rmv_sort.rows()); b_inc.fill(0);
 
+	std::vector<Eigen::MatrixXf> pics;
 
-	Eigen::MatrixXf ret;
-	return ret;
+	while (std::any_of(b_inc.data(), b_inc.data() + idx, [&b_inc](const int & i) {
+		return i == 0;
+	}))
+	{
+		std::vector<Eigen::Vector3f> seeds = pic_seeds(rmv_sort, idx, b_inc, mz_width);
+		for (auto seed : seeds)
+		{
+			Eigen::MatrixXf pic = FPIC(lcms, seed, rt_width, mz_width);
+			pics.push_back(pic);
+			std::for_each(pic.col(3).data(), pic.col(3).data() + pic.rows(), [&b_inc, &rmv_sort](const float & v) {
+				b_inc[(int)rmv_sort(int(v), 4)] = 1;
+			});
+		}
+		cout << b_inc.topRows(200).transpose() << endl;
+	}
+	cout << rmv_sort.topRows(10) << endl;
+	cout << rmv_sort.bottomRows(10) << endl;
+	return pics;
 }

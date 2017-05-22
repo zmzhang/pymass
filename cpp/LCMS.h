@@ -56,4 +56,5 @@ typedef std::function<bool(const Eigen::VectorXf &lhs, const Eigen::VectorXf &rh
 std::vector<Eigen::Vector3f> PYMASS_EXPORT pic_seeds(const Eigen::MatrixXf & m, const int & idx, const Eigen::VectorXi & b_inc, float mz_tol);
 Eigen::MatrixXf PYMASS_EXPORT FPIC(LCMS & lcms, const Eigen::Vector3f & seed, float rt_width, float mz_width);
 Eigen::MatrixXf PYMASS_EXPORT sort_by_col(const Eigen::MatrixXf & target, int col);
+std::vector<Eigen::MatrixXf> PYMASS_EXPORT FPICs(LCMS & lcms, float min_peak, float rt_width, float mz_width);
 
