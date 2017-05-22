@@ -297,40 +297,32 @@ Eigen::MatrixXf FPIC(LCMS & lcms, const Eigen::Vector3f & seed, float rt_width, 
 
 Eigen::MatrixXf sort_by_col(const Eigen::MatrixXf & target, int col)
 {
-	std::vector<Eigen::VectorXf> matrixRows;
-	for (unsigned int i = 0; i < target.rows(); i++)
-	{
-		Eigen::VectorXf vec(target.cols() + 2);
-		for (unsigned int j = 0; j < target.cols(); j++)
-		{
-			vec[j] = target(i,j);
-		}
-		vec[target.cols()] = i;
-		matrixRows.push_back(vec);
-	}
+	std::vector<int> ids(target.rows());
+	std::iota(ids.begin(), ids.end(), 0);
 
 	std::stable_sort(
-		matrixRows.begin(),
-		matrixRows.end(),
-		[&col](const Eigen::VectorXf & a, const Eigen::VectorXf & b)->bool
+		ids.begin(),
+		ids.end(),
+		[col, target](const int & i1, const int & i2)->bool
 	{
-		return a(col) > b(col);
+		return target(i1,col) > target(i2,col);
 	}
 	);
 
-	std::vector<int> ids(matrixRows.size());
-	std::iota(ids.begin(), ids.end(), 0);
+	std::vector<int> rids(target.rows());
+	std::iota(rids.begin(), rids.end(), 0);
 
-	std::stable_sort(ids.begin(), ids.end(), [&matrixRows, &target](const int & i1, const int & i2) {
-		return matrixRows[i1][target.cols()] < matrixRows[i2][target.cols()];
+	std::stable_sort(rids.begin(), rids.end(), [ids](const int & i1, const int & i2) {
+		return ids[i1] < ids[i2];
 	});
 
 	Eigen::MatrixXf sorted;
 	sorted.resize(target.rows(), target.cols() + 2);
-	for (unsigned int i = 0; i < matrixRows.size(); i++)
+	for (unsigned int i = 0; i < target.rows(); i++)
 	{
-		sorted.row(i) = matrixRows[i];
-		sorted.row(i)[target.cols() + 1] = ids[i];
+		sorted.row(i).segment(0, target.cols()) = target.row(ids[i]);
+		sorted.row(i)[target.cols()] = ids[i];
+		sorted.row(i)[target.cols() + 1] = rids[i];
 	}
 	return sorted;
 }
