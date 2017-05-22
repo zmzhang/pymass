@@ -14,7 +14,7 @@
 
 %include <typemaps.i>
 %include <std_string.i>
-%include "std_vector.i"
+%include <std_vector.i>
 
 
 namespace std {
@@ -26,6 +26,7 @@ namespace std {
    %template(MassScanVector) vector<MassScan>;
    %template(VV3f) vector<Eigen::Vector3f>;
    %template(VV4f) vector<Eigen::Vector4f>;
+   %template(PICVec) vector<Eigen::MatrixXf>;
 }
 
 

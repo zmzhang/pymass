@@ -8,6 +8,7 @@ Created on Sat Mar 25 22:16:48 2017
 
 import sys
 from _pymass import mzXMLParser
+import _pymass as pm
 import numpy as np
 from pylab import plot, show, figure, scatter, xlabel, ylabel, hist
 import pylab

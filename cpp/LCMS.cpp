@@ -362,9 +362,6 @@ std::vector<Eigen::MatrixXf> FPICs(LCMS & lcms, float min_peak, float rt_width, 
 				b_inc[(int)rmv_sort(int(v), 4)] = 1;
 			});
 		}
-		cout << b_inc.topRows(200).transpose() << endl;
 	}
-	cout << rmv_sort.topRows(10) << endl;
-	cout << rmv_sort.bottomRows(10) << endl;
 	return pics;
 }
