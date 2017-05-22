@@ -181,6 +181,12 @@ std::vector<Eigen::Vector3f> pic_seeds(const Eigen::MatrixXf & m, const int & id
 		ret[i][1] = v[1];
 		ret[i][2] = v[3];
 		i++; });
+
+	//std::stable_sort(ret.begin(), ret.end(), [](const Eigen::Vector3f & v1, const Eigen::Vector3f & v2)
+	//{
+	//	return v1[2] > v2[2];
+	//});
+
 	return ret;
 }
 
@@ -333,6 +339,7 @@ Eigen::MatrixXf sort_by_col(const Eigen::MatrixXf & target, int col)
 	return sorted;
 }
 
+#include <omp.h>
 std::vector<Eigen::MatrixXf> FPICs(LCMS & lcms, float min_peak, float rt_width, float mz_width)
 {
 
@@ -354,13 +361,18 @@ std::vector<Eigen::MatrixXf> FPICs(LCMS & lcms, float min_peak, float rt_width, 
 	}))
 	{
 		std::vector<Eigen::Vector3f> seeds = pic_seeds(rmv_sort, idx, b_inc, mz_width);
-		for (auto seed : seeds)
+		
+		#pragma omp parallel for 
+		for (int i=0; i< seeds.size(); i++)
 		{
-			Eigen::MatrixXf pic = FPIC(lcms, seed, rt_width, mz_width);
-			pics.push_back(pic);
-			std::for_each(pic.col(3).data(), pic.col(3).data() + pic.rows(), [&b_inc, &rmv_sort](const float & v) {
-				b_inc[(int)rmv_sort(int(v), 4)] = 1;
-			});
+			Eigen::MatrixXf pic = FPIC(lcms, seeds[i], rt_width, mz_width);
+			#pragma omp critical (result)
+			{
+				pics.push_back(pic);
+				std::for_each(pic.col(3).data(), pic.col(3).data() + pic.rows(), [&b_inc, &rmv_sort](const float & v) {
+					b_inc[(int)rmv_sort(int(v), 4)] = 1;
+				});
+			}
 		}
 	}
 	return pics;
