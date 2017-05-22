@@ -171,6 +171,16 @@ def FPICs(lcms, min_peak=300.0, rt_width=100, mz_width=0.5):
 
     return pics
 
+def pics_id(pics, n):
+    pic_ids=[]
+    for pic in pics:
+        pic_ids.append(pic[pic[:,2].argmax(), 3])
+    pic_ids_a = np.array(pic_ids)
+    pic_ids_sort = pic_ids_a[pic_ids_a.argsort()].astype(np.int).tolist()
+    if len(pics)<n:
+        pic_ids_sort = pic_ids_sort + [0]*(n-len(pics))
+    return pic_ids_sort
+
 #mzdata2mzxml('F:/resources/MTBLS188/study files/')
 #mzfile=u"mixture_bsa300fmol_n3.mzXML"
 mzfile=u"MM14_20um.mzxml"
@@ -189,7 +199,22 @@ tics=lcms.getTIC()
 #plot(rts,bic,'r')
 #plot(rts,tics,'g')
 
-pics = FPICs(lcms)
+pics_p = FPICs(lcms)
+pics_c = pm.FPICs(lcms, 300.0, 100.0, 0.5)
+
+
+n = max(len(pics_c), len(pics_p))
+ids_p = pics_id(pics_p, n)
+ids_c = pics_id(pics_c, n)
+
+a = np.array([ids_p, ids_c]).T
+
+pic_id =   3355          
+l_c = [i for i, p in enumerate(pics_c) if p[p[:,2].argmax(), 3] == pic_id]
+l_p = [i for i, p in enumerate(pics_p) if p[p[:,2].argmax(), 3] == pic_id]
+
+ps_c = [pics_c[i] for i in l_c]
+ps_p = [pics_p[i] for i in l_p]
 
 
 figure()
