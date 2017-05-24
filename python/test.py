@@ -78,3 +78,14 @@ rmv      = lcms.getAll()
 ids      = rmv[:,2].argsort()[::-1]
 rmv_sort = rmv[ids,:]
 hist(np.log10(rmv_sort[:,2]), bins = 800)
+
+
+seed = rmv_sort[0,:]
+stds = pm.FPICStd(lcms, seed, 100, 0.5)
+pic = pm.FPIC(lcms, seed, 100, 0.5)
+rg =  get_region(seed, lcms, 100, 0.5)
+plot_region(rg)
+figure()
+plot(pic[:,0], pic[:,2])
+figure()
+plot(stds)
