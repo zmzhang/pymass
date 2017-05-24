@@ -235,13 +235,13 @@ inline int find_idx(const std::vector<Eigen::Vector4f>& rg, const float & rt, co
 		return -1;
 	}
 }
-
-Eigen::MatrixXf FPIC(LCMS & lcms, const Eigen::Vector3f & seed, float rt_width, float mz_width)
+Eigen::MatrixXf FPIC_IMP(LCMS & lcms, const Eigen::Vector3f & seed, float rt_width, float mz_width, bool b_std, Eigen::VectorXf & std_vec)
 {
 	std::vector<Eigen::Vector4f> rg = lcms.getRegion(seed[0] - rt_width, seed[0] + rt_width, seed[1] - mz_width, seed[1] + mz_width);
 	Eigen::VectorXf rts = lcms.getRT();
 	float rt_gap = (lcms.getRT().segment(1, rts.size() - 1) - lcms.getRT().segment(0, rts.size() - 1)).mean();
 
+	std::vector<float> vec;
 
 	std::list<int>  pic_ids;
 	bool b_left = true, b_right = true;
@@ -250,6 +250,7 @@ Eigen::MatrixXf FPIC(LCMS & lcms, const Eigen::Vector3f & seed, float rt_width, 
 	float threshold = std::numeric_limits<float>::max();
 	for (int i = 0; i< int(rt_width); i++)
 	{
+
 		if (pic_ids.size()==5)
 		{
 			Eigen::VectorXf mzs(pic_ids.size());
@@ -257,6 +258,16 @@ Eigen::MatrixXf FPIC(LCMS & lcms, const Eigen::Vector3f & seed, float rt_width, 
 				return rg[i][1];
 			});
 			threshold =10 * sqrt((mzs.array() - mzs.mean()).pow(2).sum()/mzs.size());
+		}
+
+		if (b_std)
+		{
+			Eigen::VectorXf mzs(pic_ids.size());
+			std::transform(pic_ids.begin(), pic_ids.end(), mzs.data(), [&rg](const int & i) {
+				return rg[i][1];
+			});
+			vec.push_back(sqrt((mzs.array() - mzs.mean()).pow(2).sum() / mzs.size()));
+			threshold = std::numeric_limits<float>::max();
 		}
 
 		if (b_left)
@@ -292,6 +303,8 @@ Eigen::MatrixXf FPIC(LCMS & lcms, const Eigen::Vector3f & seed, float rt_width, 
 		}
 	}
 
+	std_vec = Eigen::VectorXf::Map(vec.data(), vec.size());
+
 	Eigen::MatrixXf ret(pic_ids.size(), 4);
 
 
@@ -301,6 +314,20 @@ Eigen::MatrixXf FPIC(LCMS & lcms, const Eigen::Vector3f & seed, float rt_width, 
 	});
 	return ret;
 }
+
+Eigen::MatrixXf FPIC(LCMS & lcms, const Eigen::Vector3f & seed, float rt_width, float mz_width)
+{
+	Eigen::VectorXf std_vec;
+	return FPIC_IMP(lcms, seed, rt_width, mz_width, false, std_vec);
+}
+
+Eigen::VectorXf FPICStd(LCMS & lcms, const Eigen::Vector3f & seed, float rt_width, float mz_width)
+{
+	Eigen::VectorXf std_vec;
+	FPIC_IMP(lcms, seed, rt_width, mz_width, true, std_vec);
+	return std_vec;
+}
+
 
 #include "parallel_stable_sort.h"
 Eigen::MatrixXf sort_by_col(const Eigen::MatrixXf & target, int col)
