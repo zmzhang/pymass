@@ -15,8 +15,9 @@ void testMZXML() {
 		//LCMS lcms = e.parseFile("D:/workspace/pymass/python/标2-方法5-正负离子_Seg1Ev1.mzXML");
 		//LCMS lcms = e.parseFile("../../python/mixture_bsa300fmol_n3.mzXML");
 		//LCMS lcms = e.parseFile("../../python/detnoise_sigma3_PICKED.mzXML");
-		LCMS lcms = e.parseFile("../../python/MM14_20um.mzxml");
-		//LCMS lcms = e.parseFile("../../python/Sol_Seed_Leaf_0_0_100_1-A,2_01_2431.mzxml");
+		//LCMS lcms = e.parseFile("../../python/MM14_20um.mzxml");
+		//LCMS lcms = e.parseFile("../../python/Sol_Seed_Leaf_0_0_100_1-A,2_01_2450.mzxml");
+		LCMS lcms = e.parseFile("../../python/Sol_Seed_Leaf_0_25_75_1-A,7_01_2436.mzxml");
 
 		toc();
 		//cout << lcms.getTIC().transpose() << endl;

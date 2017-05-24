@@ -179,7 +179,7 @@ std::vector<Eigen::Vector3f> pic_seeds(const Eigen::MatrixXf & m, const int & id
 	std::for_each(seed_set.begin(), seed_set.end(), [&ret, &i](const Eigen::VectorXf & v) {
 		ret[i][0] = v[0];
 		ret[i][1] = v[1];
-		ret[i][2] = v[3];
+		ret[i][2] = v[2];
 		i++; });
 
 	//std::stable_sort(ret.begin(), ret.end(), [](const Eigen::Vector3f & v1, const Eigen::Vector3f & v2)
@@ -225,6 +225,7 @@ inline int find_idx(const std::vector<Eigen::Vector4f>& rg, const float & rt, co
 		return v1[0] > v2; }) - rg.begin();
 	
 	int idx = find_closest(rg, lower, upper, mz, 1);
+
 	if (rg[idx][1] > mz - threshold && rg[idx][1] < mz + threshold)
 	{
 		return idx;
@@ -307,7 +308,6 @@ Eigen::MatrixXf sort_by_col(const Eigen::MatrixXf & target, int col)
 	std::vector<int> ids(target.rows());
 	std::iota(ids.begin(), ids.end(), 0);
 
-	tic();
 	pss::parallel_stable_sort(
 		ids.begin(),
 		ids.end(),
@@ -316,16 +316,13 @@ Eigen::MatrixXf sort_by_col(const Eigen::MatrixXf & target, int col)
 		return target(i1,col) > target(i2,col);
 	}
 	);
-	toc();
 
 	std::vector<int> rids(target.rows());
 	std::iota(rids.begin(), rids.end(), 0);
 
-	tic();
 	pss::parallel_stable_sort(rids.begin(), rids.end(), [&ids](const int & i1, const int & i2) {
 		return ids[i1] < ids[i2];
 	});
-	toc();
 
 	Eigen::MatrixXf sorted;
 	sorted.resize(target.rows(), target.cols() + 2);
@@ -344,9 +341,7 @@ std::vector<Eigen::MatrixXf> FPICs(LCMS & lcms, float min_peak, float rt_width, 
 {
 
 	Eigen::MatrixXf rmv = lcms.getAll();
-	tic();
 	Eigen::MatrixXf rmv_sort = sort_by_col(rmv, 2);
-	toc();
 	int idx = std::upper_bound(rmv_sort.col(2).data(), rmv_sort.col(2).data() + rmv_sort.rows(), min_peak,
 		[](const float & a, const float & b)->bool
 		{
@@ -356,11 +351,14 @@ std::vector<Eigen::MatrixXf> FPICs(LCMS & lcms, float min_peak, float rt_width, 
 
 	std::vector<Eigen::MatrixXf> pics;
 
+
+	int total = 0;
 	while (std::any_of(b_inc.data(), b_inc.data() + idx, [&b_inc](const int & i) {
 		return i == 0;
 	}))
 	{
 		std::vector<Eigen::Vector3f> seeds = pic_seeds(rmv_sort, idx, b_inc, mz_width);
+
 		
 		#pragma omp parallel for 
 		for (int i=0; i< seeds.size(); i++)
@@ -373,6 +371,7 @@ std::vector<Eigen::MatrixXf> FPICs(LCMS & lcms, float min_peak, float rt_width, 
 					b_inc[(int)rmv_sort(int(v), 4)] = 1;
 				});
 			}
+			total = total + 1;
 		}
 	}
 	return pics;
