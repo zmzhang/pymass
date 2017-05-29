@@ -14,7 +14,6 @@ from pylab import plot, show, figure, scatter, xlabel, ylabel, hist
 import pylab
 from matplotlib.ticker import FormatStrFormatter
 import subprocess, os
-from sortedcontainers import SortedSet 
 
 def tic():
     #Homemade version of matlab tic and toc functions
@@ -65,27 +64,29 @@ def pics_id(pics, n):
         pic_ids_sort = pic_ids_sort + [0]*(n-len(pics))
     return pic_ids_sort
 
-#mzdata2mzxml('F:/resources/MTBLS188/study files/')
-mzfile=u"MM14_20um.mzxml"
-parser=mzXMLParser()
-lcms = parser.parseFile(mzfile.encode(sys.getfilesystemencoding()))
-pics_c = pm.FPICs(lcms, 300.0, 100.0, 0.5)
-
-
-
-figure()
-rmv      = lcms.getAll()
-ids      = rmv[:,2].argsort()[::-1]
-rmv_sort = rmv[ids,:]
-hist(np.log10(rmv_sort[:,2]), bins = 800)
-
-
-seed = rmv_sort[0,:]
-stds = pm.FPICStd(lcms, seed, 100, 0.5)
-pic = pm.FPIC(lcms, seed, 100, 0.5)
-rg =  get_region(seed, lcms, 100, 0.5)
-plot_region(rg)
-figure()
-plot(pic[:,0], pic[:,2])
-figure()
-plot(stds)
+if __name__=="__main__":
+    
+    #mzdata2mzxml('F:/resources/MTBLS188/study files/')
+    mzfile=u"MM14_20um.mzxml"
+    parser=mzXMLParser()
+    lcms = parser.parseFile(mzfile.encode(sys.getfilesystemencoding()))
+    pics_c = pm.FPICs(lcms, 300.0, 100.0, 0.5)
+    
+    
+    
+    figure()
+    rmv      = lcms.getAll()
+    ids      = rmv[:,2].argsort()[::-1]
+    rmv_sort = rmv[ids,:]
+    hist(np.log10(rmv_sort[:,2]), bins = 800)
+    
+    
+    seed = rmv_sort[0,:]
+    stds = pm.FPICStd(lcms, seed, 100, 0.5)
+    pic = pm.FPIC(lcms, seed, 100, 0.5)
+    rg =  get_region(seed, lcms, 100, 0.5)
+    plot_region(rg)
+    figure()
+    plot(pic[:,0], pic[:,2])
+    figure()
+    plot(stds)
