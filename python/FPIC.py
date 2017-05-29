@@ -64,6 +64,19 @@ def pics_id(pics, n):
         pic_ids_sort = pic_ids_sort + [0]*(n-len(pics))
     return pic_ids_sort
 
+def pics2peaks(pics):
+    peaks = np.zeros((len(pics), 7))
+    for i, pic in enumerate(pics):
+        idx = pic[:,2].argmax()
+        peaks[i,0] = pic[0  , 0]   # RT min
+        peaks[i,1] = pic[-1 , 0]   # RT max
+        peaks[i,2] = pic[idx, 0]   # RT apex
+        peaks[i,3] = pic[0  , 1]   # MZ min
+        peaks[i,4] = pic[-1 , 1]   # MZ max
+        peaks[i,5] = pic[idx, 1]   # MZ apex
+        peaks[i,6] = pic[idx, 2]   # Intensity max   
+    return peaks
+
 if __name__=="__main__":
     
     #mzdata2mzxml('F:/resources/MTBLS188/study files/')
