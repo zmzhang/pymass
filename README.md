@@ -32,30 +32,30 @@ In future, more file formats will be supported and more methods will be implemen
 * Open "VS2015 x64 Native Tools Command Prompt" 
 * Run following commands in the prompt
 
-		```shell
-		cd pymass
-		mkdir build
-		cd build
-	    cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release
-	    nmake
-		nmake install
-		```
+	```shell
+	cd pymass
+	mkdir build
+	cd build
+	cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release
+	nmake
+	nmake install
+	```
 
 # Usage
 
 * Go to pymass/python directory
 * Download MM14 dataset from this [url](https://msbi.ipb-halle.de/download/Sample-1.tar.bz2) and unzip it
-* Run following code fragment
+* Run following Python code fragment
 
-		```python
-		from _pymass import mzXMLParser, FPICs
-		import sys
-		mzfile="MM14_20um.mzxml"
-		mzfile=mzfile.encode(sys.getfilesystemencoding())
-		parser=mzXMLParser()
-		lcms = parser.parseFile(mzfile)
-		pics = FPICs(lcms, 300.0, 100.0, 0.5)
-		```
+	```python
+	from _pymass import mzXMLParser, FPICs
+	import sys
+	mzfile="MM14_20um.mzxml"
+	mzfile=mzfile.encode(sys.getfilesystemencoding())
+	parser=mzXMLParser()
+	lcms = parser.parseFile(mzfile)
+	pics = FPICs(lcms, 300.0, 100.0, 0.5)
+	```
 
 # Contact
 
