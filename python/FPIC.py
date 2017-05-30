@@ -77,6 +77,19 @@ def pics2peaks(pics):
         peaks[i,6] = pic[idx, 2]         # Intensity max   
     return peaks
 
+def merge_peaks(ps, mz_tol, rt_tol):
+    peaks_refine = []    
+    for p in ps:
+        bexist = []
+        for pr in peaks_refine:
+            if abs(p[0] - pr[0]) <mz_tol and abs(p[3] - pr[3]) < rt_tol:
+                bexist.append(True)
+            else:
+                bexist.append(False)
+        if sum(bexist) == 0:
+            peaks_refine.append(p)
+    return np.array(peaks_refine) 
+
 if __name__=="__main__":
     
     #mzdata2mzxml('F:/resources/MTBLS188/study files/')
