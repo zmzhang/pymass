@@ -162,7 +162,6 @@ void mzXMLParser::parseString(string s) {
 	XML_Parse(parser, s.c_str(), len, 1);
 }
 
-#include <boost/progress.hpp>
 #include <thread>
 
 LCMS mzXMLParser::parseFile(const std::string& filename) {
@@ -183,7 +182,6 @@ LCMS mzXMLParser::parseFile(const std::string& filename) {
 		int CHUNK_NUM = int(ceil(float(sz) / BUFFER_SIZE));
 		std::vector<char *> buf_ptr(CHUNK_NUM, NULL);
 		std::vector<int> buf_sz(CHUNK_NUM, NULL);
-		boost::progress_display show_progress(sz);
 
 		std::thread read_thread([this,fd,&buf_ptr,&buf_sz, BUFFER_SIZE]() {
 			for (int i = 0; i < buf_ptr.size(); i++)
@@ -202,7 +200,7 @@ LCMS mzXMLParser::parseFile(const std::string& filename) {
 
 		});
 
-		std::thread parse_thread([this, &buf_ptr, &buf_sz, &show_progress]() {
+		std::thread parse_thread([this, &buf_ptr, &buf_sz]() {
 			for (int i = 0; i < buf_ptr.size(); i++)
 			{
 				while(buf_ptr[i]==NULL)
@@ -214,7 +212,6 @@ LCMS mzXMLParser::parseFile(const std::string& filename) {
 					throw std::runtime_error("could not parse buffer");
 				}
 				delete[] buf_ptr[i];
-				show_progress += bytes_read;
 			}
 		});
 		read_thread.join();

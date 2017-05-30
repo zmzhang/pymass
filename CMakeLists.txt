@@ -28,17 +28,6 @@ else()
 endif()
 
 
-# find boost
-set(Boost_USE_STATIC_LIBS OFF) 
-set(Boost_USE_MULTITHREADED ON)  
-set(Boost_USE_STATIC_RUNTIME OFF) 
-find_package(Boost) 
-if(Boost_FOUND)
-    include_directories(${Boost_INCLUDE_DIRS}) 
-else()
-  message(FATAL_ERROR "Could not find BOOST, which is a required depedency")
-endif()
-
 # find base64SIMD
 get_filename_component(BASE64_ABS_PATH "../thirdparty/base64SIMD" ABSOLUTE)
 include_directories("${BASE64_ABS_PATH}/include")
