@@ -1,7 +1,7 @@
 # PyMass
 Package for analyzing MS with Python
 
-It can provide the following functionalities:
+It can provide the following functionalities now:
 
 
 * mzXMLParser for fast and efficient mzXML parse
@@ -16,6 +16,7 @@ In future, more file formats will be supported and more methods will be implemen
 
 * [Visual Studio Community 2015 with Update 3](http://download.microsoft.com/download/b/e/d/bedddfc4-55f4-4748-90a8-ffe38a40e89f/vs2015.3.com_enu.iso)
 * [Anaconda Python 3.6.0 64bit](https://repo.continuum.io/archive/Anaconda3-4.3.1-Windows-x86_64.exe)
+* [SWIG 3.0.10](https://sourceforge.net/projects/swig/files/swigwin/swigwin-3.0.10/)
 * [CMake 3.7.1](https://cmake.org/files/v3.7/cmake-3.7.1-win64-x64.msi)
 * [Eigen 3.3.3](http://bitbucket.org/eigen/eigen/get/3.3.3.zip) 
 * [Threading Building Blocks 2017 Update 6](https://github.com/01org/tbb/releases/download/2017_U6/tbb2017_20170412oss_win.zip)
@@ -45,7 +46,7 @@ In future, more file formats will be supported and more methods will be implemen
 
 * Go to pymass/python directory
 * Download MM14 dataset from this [url](https://msbi.ipb-halle.de/download/Sample-1.tar.bz2) and unzip it
-* Run following Python code fragment
+* Run following Python code fragment to parse mzXML file and extract PICs from it
 
 	```python
 	from _pymass import mzXMLParser, FPICs
