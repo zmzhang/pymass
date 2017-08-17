@@ -8,7 +8,7 @@ Created on Wed Aug 16 08:14:15 2017
 
 import subprocess
 import pyopenms
-
+from FPIC import data2mzxml
 
 def simulation(fasta, contaminants, out, out_cntm,
                simulator = 'C:/Program Files/OpenMS/bin/MSSimulator.exe'):   
@@ -47,6 +47,8 @@ if __name__=="__main__":
     
     simulation('simulation/test.fasta','simulation/MM48_MSSimulator.csv',
                'MM48_MSS.mzML', 'MM48_MSS.featureXML' )
+    
+    data2mzxml('./')
     
     parse_featureXML('MM48_MSS.featureXML')
     

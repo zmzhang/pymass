@@ -45,13 +45,17 @@ def plot_region(rg, rt = None, mz = None):
     ax.yaxis.set_major_formatter(FormatStrFormatter('%.4f'))
     show()
 
-def mzdata2mzxml(path, converter = 'C:/Program Files/OpenMS/bin/FileConverter.exe'):
+def data2mzxml(path, converter = 'C:/Program Files/OpenMS/bin/FileConverter.exe'):
     files=os.listdir(path)
     for f in files:
         if f.lower().endswith(".mzdata"): 
             file_in  = path + f
             file_out = path + f[0:-6] + "mzxml"
             subprocess.Popen([converter, '-in', file_in, '-out', file_out])
+        if f.lower().endswith(".mzml"):
+            file_in  = path + f
+            file_out = path + f[0:-4] + "mzxml"
+            subprocess.Popen([converter, '-in', file_in, '-out', file_out])  
 
 
 def pics_id(pics, n):
@@ -92,7 +96,7 @@ def merge_peaks(ps, mz_tol, rt_tol):
 
 if __name__=="__main__":
     
-    #mzdata2mzxml('F:/resources/MTBLS188/study files/')
+    #data2mzxml('F:/resources/MTBLS188/study files/')
     mzfile=u"MM14_20um.mzxml"
     parser=mzXMLParser()
     lcms = parser.parseFile(mzfile.encode(sys.getfilesystemencoding()))
