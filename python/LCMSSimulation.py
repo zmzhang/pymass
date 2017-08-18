@@ -8,6 +8,7 @@ Created on Wed Aug 16 08:14:15 2017
 
 import subprocess
 import pyopenms
+import pandas as pd
 from FPIC import data2mzxml
 
 def simulation(fasta, contaminants, out, out_cntm,
@@ -30,14 +31,16 @@ def parse_featureXML(feature_file):
     featurexml = pyopenms.FeatureXMLFile()
     featurexml.load(feature_file, featuremap)
     
+    hulls = pd.DataFrame(columns=['rt_min', 'rt_max', 'mz_min', 'mz_max', 'detected', 'pic_id'])   
     for i in range(featuremap.size()):
         feature = featuremap[i]
         chs = feature.getConvexHulls()
-        pts = chs[0].getHullPoints()
-    return pts
+        for j in range(len(chs)):
+            pts = chs[j].getHullPoints()
+            hulls.loc[len(hulls)] = [pts.min(0)[0], pts.max(0)[0], pts.min(0)[1], pts.max(0)[1], False, str(-1)]
+    return hulls
 
 if __name__=="__main__":
-    import pandas as pd
     mm48_all = pd.read_csv('simulation/MM48_annotations.csv')
     mm48_all['charge'] = [1] * mm48_all.shape[0]
     mm48_all['shape'] = ['gauss'] * mm48_all.shape[0]
@@ -55,5 +58,5 @@ if __name__=="__main__":
     
     data2mzxml('./')
     
-    parse_featureXML('MM48_MSS.featureXML')
+    hulls = parse_featureXML('MM48_MSS.featureXML')
     
