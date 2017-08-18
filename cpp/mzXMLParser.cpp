@@ -62,7 +62,14 @@ void mzXMLParser::InitHandlers() {
 			}
 			else
 			{
-				scan.BIC = scan.val.maxCoeff();
+				if(scan.val.size()>0)
+				{
+					scan.BIC = scan.val.maxCoeff();
+				}
+				else
+				{
+					scan.BIC = 0.0;
+				}
 			}
 
 			if (atts.find("totIonCurrent") != atts.end())
@@ -71,7 +78,14 @@ void mzXMLParser::InitHandlers() {
 			}
 			else
 			{
-				scan.TIC = scan.val.sum();
+				if (scan.val.size()>0)
+				{
+					scan.TIC = scan.val.sum();
+				}
+				else
+				{
+					scan.TIC = 0.0;
+				}
 			}
 			
 			delete[] raw;
@@ -100,7 +114,15 @@ void mzXMLParser::InitHandlers() {
 			byteswap_avx2(reinterpret_cast<uint32_t*>(floatArray), nNum * 2);
 			pscan->mz = Eigen::Map<Eigen::VectorXf, 0, Eigen::InnerStride<2>>(floatArray, nNum);
 			pscan->val = Eigen::Map<Eigen::VectorXf, 0, Eigen::InnerStride<2>>(floatArray + 1, nNum);
-			pscan->TIC = pscan->val.sum();
+			
+			if (pscan->val.size()>0)
+			{
+				pscan->TIC = pscan->val.sum();
+			}
+			else
+			{
+				pscan->TIC = 0.0;
+			}
 			delete[] raw;
 		}
 
