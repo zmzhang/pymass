@@ -97,13 +97,21 @@ std::vector<Eigen::Vector4f> LCMS::getRegion(float rt_begin, float rt_end, float
 {
 	update();
 	std::vector<Eigen::VectorXi> mzi_vec;
+	std::vector<int> rti_vec;
 	Eigen::VectorXf rts(2); rts << rt_begin, rt_end;
 	Eigen::VectorXf mzs(2); mzs << mz_begin, mz_end;
 	Eigen::VectorXi rti = findclosest(m_vecRT, rts);
 	for (int i = rti[0]; i<=rti[1]; i++)
 	{
 		Eigen::VectorXi mzi = findclosest(m_massScans[i].mz, mzs);
-		mzi_vec.push_back(mzi);
+
+		if (m_massScans[i].mz.size()>0 &&
+			m_massScans[i].mz[mzi[0]] > mz_begin - 2 &&
+			m_massScans[i].mz[mzi[1]] < mz_end + 2)
+		{
+			mzi_vec.push_back(mzi);
+			rti_vec.push_back(i);
+		}
 	}
 
 	int rows = std::accumulate(mzi_vec.begin(), mzi_vec.end(), 0, [](int s, const Eigen::VectorXi & mzi) {
@@ -113,14 +121,14 @@ std::vector<Eigen::Vector4f> LCMS::getRegion(float rt_begin, float rt_end, float
 	std::vector<Eigen::Vector4f> ret;
 	ret.resize(rows);
 	int s = 0;
-	for (int i = 0; i<mzi_vec.size(); i++)
+	for (int i = 0; i<rti_vec.size(); i++)
 	{
 		for (int j = mzi_vec[i][0]; j<=mzi_vec[i][1]; j++)
 		{
-			ret[s][0] = m_vecRT[i + rti[0]];
-			ret[s][1] = m_massScans[i + rti[0]].mz[j];
-			ret[s][2] = m_massScans[i + rti[0]].val[j];
-			ret[s][3] = m_massScans[i + rti[0]].id[j];
+			ret[s][0] = m_vecRT[rti_vec[i]];
+			ret[s][1] = m_massScans[rti_vec[i]].mz[j];
+			ret[s][2] = m_massScans[rti_vec[i]].val[j];
+			ret[s][3] = m_massScans[rti_vec[i]].id[j];
 			s = s + 1;
 		}
 	}
@@ -226,7 +234,7 @@ inline int find_idx(const std::vector<Eigen::Vector4f>& rg, const float & rt, co
 	
 	int idx = find_closest(rg, lower, upper, mz, 1);
 
-	if (rg[idx][1] > mz - threshold && rg[idx][1] < mz + threshold)
+	if (rg[idx][1] >= mz - threshold && rg[idx][1] <= mz + threshold)
 	{
 		return idx;
 	}
@@ -257,7 +265,7 @@ Eigen::MatrixXf FPIC_IMP(LCMS & lcms, const Eigen::Vector3f & seed, float rt_wid
 			std::transform(pic_ids.begin(), pic_ids.end(), mzs.data(), [&rg](const int & i) {
 				return rg[i][1];
 			});
-			threshold =10 * sqrt((mzs.array() - mzs.mean()).pow(2).sum()/mzs.size());
+			threshold =10 * sqrt((mzs.array() - mzs.mean()).pow(2).sum()/mzs.size()) + std::numeric_limits<float>::epsilon();
 		}
 
 		if (b_std)
