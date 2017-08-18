@@ -46,7 +46,12 @@ if __name__=="__main__":
     mm48.to_csv('simulation/MM48_MSSimulator.csv', header=False, index=False)
     
     simulation('simulation/test.fasta','simulation/MM48_MSSimulator.csv',
-               'MM48_MSS.mzML', 'MM48_MSS.featureXML' )
+               'MM48_MSS_Profile.mzML', 'MM48_MSS.featureXML' )
+    
+    
+    peak_picker = 'C:/Program Files/OpenMS/bin/PeakPickerHiRes.exe'
+    subprocess.call([peak_picker,'-in', 'MM48_MSS_Profile.mzML',
+                    '-out', 'MM48_MSS.mzML'])
     
     data2mzxml('./')
     
