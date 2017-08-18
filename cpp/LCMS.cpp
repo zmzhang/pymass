@@ -105,9 +105,7 @@ std::vector<Eigen::Vector4f> LCMS::getRegion(float rt_begin, float rt_end, float
 	{
 		Eigen::VectorXi mzi = findclosest(m_massScans[i].mz, mzs);
 
-		if (m_massScans[i].mz.size()>0 &&
-			m_massScans[i].mz[mzi[0]] > mz_begin - 2 &&
-			m_massScans[i].mz[mzi[1]] < mz_end + 2)
+		if (m_massScans[i].mz.size()>0 )
 		{
 			mzi_vec.push_back(mzi);
 			rti_vec.push_back(i);
@@ -222,9 +220,14 @@ inline int find_closest(const std::vector<Eigen::Vector4f>& rg, const int & l, c
 	}
 }
 
-inline int find_idx(const std::vector<Eigen::Vector4f>& rg, const float & rt, const float & mz, float threshold)
+inline int find_idx(const std::vector<Eigen::Vector4f>& rg, const float & rt, const float & mz, float threshold, float rt_gap)
 {
 	float _rt = rg[find_closest(rg, 0, (int)rg.size(), rt, 0)][0];
+
+	if (abs(_rt - rt) > 0.5*rt_gap)
+	{
+		return -1;
+	}
 
 	int lower = std::lower_bound(rg.begin() , rg.end(), _rt, [](const Eigen::Vector4f & v1, const float& v2) -> bool {
 		return v1[0] < v2; }) -rg.begin();
@@ -253,7 +256,7 @@ Eigen::MatrixXf FPIC_IMP(LCMS & lcms, const Eigen::Vector3f & seed, float rt_wid
 
 	std::list<int>  pic_ids;
 	bool b_left = true, b_right = true;
-	pic_ids.push_back(find_idx(rg, seed[0], seed[1], std::numeric_limits<float>::max()));
+	pic_ids.push_back(find_idx(rg, seed[0], seed[1], std::numeric_limits<float>::max(), rt_gap));
 
 	float threshold = std::numeric_limits<float>::max();
 	for (int i = 0; i< int(rt_width); i++)
@@ -281,7 +284,7 @@ Eigen::MatrixXf FPIC_IMP(LCMS & lcms, const Eigen::Vector3f & seed, float rt_wid
 		if (b_left)
 		{
 			float rt_left = rg[pic_ids.front()][0] - rt_gap;
-			int idx_left = find_idx(rg, rt_left, seed[1], threshold);
+			int idx_left = find_idx(rg, rt_left, seed[1], threshold, rt_gap);
 			if (idx_left != -1)
 			{
 				pic_ids.push_front(idx_left);
@@ -295,7 +298,7 @@ Eigen::MatrixXf FPIC_IMP(LCMS & lcms, const Eigen::Vector3f & seed, float rt_wid
 		if (b_right)
 		{
 			float rt_right = rg[pic_ids.back()][0] + rt_gap;
-			int idx_right = find_idx(rg, rt_right, seed[1], threshold);
+			int idx_right = find_idx(rg, rt_right, seed[1], threshold, rt_gap);
 			if (idx_right != -1)
 			{
 				pic_ids.push_back(idx_right);
