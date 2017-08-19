@@ -42,6 +42,30 @@ def parse_featureXML(feature_file):
             hulls.loc[len(hulls)] = [pts.min(0)[0], pts.max(0)[0], pts.min(0)[1], pts.max(0)[1], False, str(-1)]
     return hulls
 
+def FeatureFindingMetabo(mzfile):
+    exp = pyopenms.MSExperiment()
+    pyopenms.MzXMLFile().load(mzfile, exp)
+    
+    mtd_params = pyopenms.MassTraceDetection().getDefaults()
+    mtd = pyopenms.MassTraceDetection()
+    mtd.setParameters(mtd_params)
+    mass_traces=[]
+    mtd.run(exp, mass_traces)
+    
+    epdet_params = pyopenms.ElutionPeakDetection().getDefaults()
+    epdet = pyopenms.ElutionPeakDetection()
+    epdet.setParameters(epdet_params)
+    splitted_mass_traces = []
+    epdet.detectPeaks(mass_traces, splitted_mass_traces)
+    
+    ffm_params = pyopenms.FeatureFindingMetabo().getDefaults()
+    ffm = pyopenms.FeatureFindingMetabo()
+    ffm.setParameters(ffm_params)
+    feature_map = pyopenms.FeatureMap()
+    ffm.run(splitted_mass_traces, feature_map)
+    return feature_map
+
+
 if __name__=="__main__":
     mm48_all = pd.read_csv('simulation/MM48_annotations.csv')
     mm48_all['charge'] = [1] * mm48_all.shape[0]
@@ -79,3 +103,4 @@ if __name__=="__main__":
                 hulls.at[i, 'detected'] = True
                 hulls.at[i, 'pic_id'] = str(i)
     
+    feature_map = FeatureFindingMetabo(mzfile)
