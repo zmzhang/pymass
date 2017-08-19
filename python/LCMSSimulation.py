@@ -65,6 +65,14 @@ def FeatureFindingMetabo(mzfile):
     ffm.run(splitted_mass_traces, feature_map)
     return feature_map
 
+def params2df(params):
+    params_df = pd.DataFrame(columns=['name', 'value'])
+    for k, v in sorted(params.items()):
+        if type(v) == type(bytes()):
+            v = v.decode('utf-8')
+        params_df.loc[len(params_df)] = [k.decode('utf-8'),v]
+    return params_df
+
 
 if __name__=="__main__":
     mm48_all = pd.read_csv('simulation/MM48_annotations.csv')
@@ -104,3 +112,5 @@ if __name__=="__main__":
                 hulls.at[i, 'pic_id'] = str(i)
     
     feature_map = FeatureFindingMetabo(mzfile)
+    
+    params = params2df(pyopenms.FeatureFindingMetabo().getDefaults())
