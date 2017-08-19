@@ -6,10 +6,12 @@ Created on Wed Aug 16 08:14:15 2017
 """
 
 
-import subprocess
+import subprocess, sys
 import pyopenms
 import pandas as pd
 from FPIC import data2mzxml
+from _pymass import mzXMLParser
+import _pymass as pm
 
 def simulation(fasta, contaminants, out, out_cntm,
                simulator = 'C:/Program Files/OpenMS/bin/MSSimulator.exe'):   
@@ -59,4 +61,21 @@ if __name__=="__main__":
     data2mzxml('./')
     
     hulls = parse_featureXML('MM48_MSS.featureXML')
+    
+    mzfile =  "MM48_MSS.mzxml"
+
+    parser=mzXMLParser()
+    lcms = parser.parseFile(mzfile.encode(sys.getfilesystemencoding()))
+    pics_c = pm.FPICs(lcms, 10.0, 200.0, 0.5)
+    
+    for i,pic in enumerate(pics_c):
+        idx = pic[:,2].argmax()
+        rt  = pic[idx,0]
+        mz  = pic[idx,1]
+        for i in range(len(hulls)):
+            if(rt >= hulls.at[i, 'rt_min'] and rt <= hulls.at[i, 'rt_max'] and
+               mz >= hulls.at[i, 'mz_min']-0.01 and mz <= hulls.at[i, 'mz_max']+0.01
+               ):
+                hulls.at[i, 'detected'] = True
+                hulls.at[i, 'pic_id'] = str(i)
     
