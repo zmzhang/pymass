@@ -39,7 +39,7 @@ def parse_featureXML_GT(feature_file):
         chs = feature.getConvexHulls()
         for j in range(len(chs)):
             pts = chs[j].getHullPoints()
-            hulls.loc[len(hulls)] = [pts.min(0)[0], pts.max(0)[0], pts.min(0)[1], pts.max(0)[1], False, str(-1)]
+            hulls.loc[len(hulls)] = [pts.min(0)[0], pts.max(0)[0], pts.min(0)[1], pts.max(0)[1], False, -1]
     return hulls
 
 def FeatureFindingMetabo1(mzfile):
@@ -78,7 +78,7 @@ def FeatureFindingMetabo(mzfile):
     featuremap = pyopenms.FeatureMap()
     featurexml = pyopenms.FeatureXMLFile()
     featurexml.load(feature_file, featuremap)
-    #os.remove(feature_file)
+    os.remove(feature_file)
     return featuremap
 
 def parse_featureXML_FFM(featuremap):   
@@ -94,7 +94,8 @@ def parse_featureXML_FFM(featuremap):
                 df.loc[len(df)] = [rt, mz, intensity]
             else:
                 mz_delta = isotope_distances[j-1]
-                df.loc[len(df)] = [rt, mz + mz_delta, intensity] 
+                mz = mz + mz_delta
+                df.loc[len(df)] = [rt, mz, intensity] 
     return df
 
 
@@ -105,6 +106,28 @@ def params2df(params):
             v = v.decode('utf-8')
         params_df.loc[len(params_df)] = [k.decode('utf-8'),v]
     return params_df
+
+
+def pics2df(pics):
+    df = pd.DataFrame(columns=['rt', 'mz', 'intensity'])
+    for i,pic in enumerate(pics):
+        idx = pic[:,2].argmax()
+        rt  = pic[idx,0]
+        mz  = pic[idx,1]
+        intensity = pic[idx,2]
+        df.loc[len(df)] = [rt, mz, intensity] 
+    return df
+
+def match_features(ground_truths, df):
+    for i in range(len(df)):
+        rt  = df.at[i, 'rt']
+        mz  = df.at[i, 'mz']
+        for j in range(len(ground_truths)):
+            if(rt >= ground_truths.at[j, 'rt_min'] and rt <= ground_truths.at[j, 'rt_max'] and
+               mz >= ground_truths.at[j, 'mz_min']-0.01 and mz <= ground_truths.at[j, 'mz_max']+0.01
+               ):
+                ground_truths.at[j, 'detected'] = True
+                ground_truths.at[j, 'pic_id'] = i
 
 
 if __name__=="__main__":
@@ -125,7 +148,7 @@ if __name__=="__main__":
     
     data2mzxml('./')
     
-    hulls = parse_featureXML_GT('MM48_MSS.featureXML')
+    ground_truths = parse_featureXML_GT('MM48_MSS.featureXML')
     
     mzfile =  "MM48_MSS.mzxml"
     mzMLfile =  "MM48_MSS.mzML"
@@ -134,18 +157,15 @@ if __name__=="__main__":
     lcms = parser.parseFile(mzfile.encode(sys.getfilesystemencoding()))
     pics_c = pm.FPICs(lcms, 10.0, 200.0, 0.5)
     
-    for i,pic in enumerate(pics_c):
-        idx = pic[:,2].argmax()
-        rt  = pic[idx,0]
-        mz  = pic[idx,1]
-        for i in range(len(hulls)):
-            if(rt >= hulls.at[i, 'rt_min'] and rt <= hulls.at[i, 'rt_max'] and
-               mz >= hulls.at[i, 'mz_min']-0.01 and mz <= hulls.at[i, 'mz_max']+0.01
-               ):
-                hulls.at[i, 'detected'] = True
-                hulls.at[i, 'pic_id'] = str(i)
+    ground_truths1 = ground_truths.copy()
+    match_features(ground_truths1, pics2df(pics_c))
+    ground_truths1.detected.value_counts()
     
     feature_map = FeatureFindingMetabo(mzMLfile)
-    df = parse_featureXML_FFM(feature_map)
+    df_ffm = parse_featureXML_FFM(feature_map)
+    
+    ground_truths2 = ground_truths.copy()
+    match_features(ground_truths2, df_ffm)
+    ground_truths2.detected.value_counts()
     
     params = params2df(pyopenms.FeatureFindingMetabo().getDefaults())
