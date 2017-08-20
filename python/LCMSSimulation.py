@@ -6,7 +6,7 @@ Created on Wed Aug 16 08:14:15 2017
 """
 
 
-import subprocess, sys
+import subprocess, sys, os
 import pyopenms
 import pandas as pd
 from FPIC import data2mzxml
@@ -42,7 +42,7 @@ def parse_featureXML(feature_file):
             hulls.loc[len(hulls)] = [pts.min(0)[0], pts.max(0)[0], pts.min(0)[1], pts.max(0)[1], False, str(-1)]
     return hulls
 
-def FeatureFindingMetabo(mzfile):
+def FeatureFindingMetabo1(mzfile):
     exp = pyopenms.MSExperiment()
     pyopenms.MzXMLFile().load(mzfile, exp)
     
@@ -63,6 +63,22 @@ def FeatureFindingMetabo(mzfile):
     ffm.setParameters(ffm_params)
     feature_map = pyopenms.FeatureMap()
     ffm.run(splitted_mass_traces, feature_map)
+    return feature_map
+
+def FeatureFindingMetabo(mzfile):
+    finder = 'C:/Program Files/OpenMS/bin/FeatureFinderMetabo.exe'
+    feature_file = 'tmp.featureXML'
+    subprocess.call([finder, '-in', mzfile, '-out', feature_file, 
+               '-algorithm:common:noise_threshold_int', '10',
+               '-algorithm:common:chrom_peak_snr', '3',
+               '-algorithm:common:chrom_fwhm', '5',
+               '-algorithm:mtd:mass_error_ppm', '20',
+               '-algorithm:mtd:reestimate_mt_sd', 'true',
+               '-algorithm:epd:width_filtering', 'off'])  
+    featuremap = pyopenms.FeatureMap()
+    featurexml = pyopenms.FeatureXMLFile()
+    featurexml.load(feature_file, featuremap)
+    os.remove(feature_file)
     return feature_map
 
 def params2df(params):
@@ -95,6 +111,7 @@ if __name__=="__main__":
     hulls = parse_featureXML('MM48_MSS.featureXML')
     
     mzfile =  "MM48_MSS.mzxml"
+    mzMLfile =  "MM48_MSS.mzML"
 
     parser=mzXMLParser()
     lcms = parser.parseFile(mzfile.encode(sys.getfilesystemencoding()))
@@ -111,6 +128,6 @@ if __name__=="__main__":
                 hulls.at[i, 'detected'] = True
                 hulls.at[i, 'pic_id'] = str(i)
     
-    feature_map = FeatureFindingMetabo(mzfile)
+    feature_map = FeatureFindingMetabo(mzMLfile)
     
     params = params2df(pyopenms.FeatureFindingMetabo().getDefaults())
