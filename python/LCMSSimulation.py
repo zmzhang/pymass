@@ -28,7 +28,7 @@ def simulation(fasta, contaminants, out, out_cntm,
                '-algorithm:MSSim:RT:scan_window:min', '0',
                '-algorithm:MSSim:RT:scan_window:max', '1000'])
 
-def parse_featureXML(feature_file):
+def parse_featureXML_GT(feature_file):
     featuremap = pyopenms.FeatureMap()
     featurexml = pyopenms.FeatureXMLFile()
     featurexml.load(feature_file, featuremap)
@@ -78,8 +78,25 @@ def FeatureFindingMetabo(mzfile):
     featuremap = pyopenms.FeatureMap()
     featurexml = pyopenms.FeatureXMLFile()
     featurexml.load(feature_file, featuremap)
-    os.remove(feature_file)
-    return feature_map
+    #os.remove(feature_file)
+    return featuremap
+
+def parse_featureXML_FFM(featuremap):   
+    df = pd.DataFrame(columns=['rt', 'mz', 'intensity'])   
+    for i in range(featuremap.size()):
+        feature = featuremap[i]
+        isotope_distances = feature.getMetaValue(b'isotope_distances')
+        rt = feature.getRT()
+        mz = feature.getMZ()
+        intensity = feature.getIntensity()
+        for j in range(feature.getMetaValue(b'num_of_masstraces')):
+            if j == 0:
+                df.loc[len(df)] = [rt, mz, intensity]
+            else:
+                mz_delta = isotope_distances[j-1]
+                df.loc[len(df)] = [rt, mz + mz_delta, intensity] 
+    return df
+
 
 def params2df(params):
     params_df = pd.DataFrame(columns=['name', 'value'])
@@ -108,7 +125,7 @@ if __name__=="__main__":
     
     data2mzxml('./')
     
-    hulls = parse_featureXML('MM48_MSS.featureXML')
+    hulls = parse_featureXML_GT('MM48_MSS.featureXML')
     
     mzfile =  "MM48_MSS.mzxml"
     mzMLfile =  "MM48_MSS.mzML"
@@ -129,5 +146,6 @@ if __name__=="__main__":
                 hulls.at[i, 'pic_id'] = str(i)
     
     feature_map = FeatureFindingMetabo(mzMLfile)
+    df = parse_featureXML_FFM(feature_map)
     
     params = params2df(pyopenms.FeatureFindingMetabo().getDefaults())
