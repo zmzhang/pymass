@@ -23,10 +23,13 @@ def simulation(fasta, contaminants, out, out_cntm,
    
     subprocess.call([simulator, '-in', fasta, '-out', out, '-out_cntm',out_cntm, 
                '-algorithm:MSSim:RawSignal:contaminants:file', contaminants,
+               '-algorithm:MSSim:RawSignal:noise:detector:stddev', '1',
+               '-algorithm:MSSim:RawSignal:resolution:value', '5000',
+               '-algorithm:MSSim:RawSignal:resolution:type', 'constant',
                '-algorithm:MSSim:Ionization:mz:lower_measurement_limit', '10',
                '-algorithm:MSSim:Ionization:mz:upper_measurement_limit', '1000',
                '-algorithm:MSSim:RT:total_gradient_time', '1000',
-               '-algorithm:MSSim:RT:sampling_rate', '0.1',
+               '-algorithm:MSSim:RT:sampling_rate', '0.25',
                '-algorithm:MSSim:RT:scan_window:min', '0',
                '-algorithm:MSSim:RT:scan_window:max', '1000'])
 
@@ -148,22 +151,13 @@ if __name__=="__main__":
     subprocess.call([peak_picker,'-in', 'MM48_MSS_Profile.mzML',
                     '-out', 'MM48_MSS.mzML'])
     
-    data2mzxml('./')
+    data2mzxml('MM48_MSS.mzML')
     
     ground_truths = parse_featureXML_GT('MM48_MSS.featureXML')
     
     mzfile =  "MM48_MSS.mzxml"
     mzMLfile =  "MM48_MSS.mzML"
 
-    tic()
-    parser=mzXMLParser()
-    lcms = parser.parseFile(mzfile.encode(sys.getfilesystemencoding()))
-    pics_c = pm.FPICs(lcms, 10.0, 200.0, 0.5)
-    toc()
-    
-    match_fpic = ground_truths.copy()
-    match_features(match_fpic, pics2df(pics_c))
-    match_fpic.detected.value_counts()
     
     tic()
     feature_map = FeatureFindingMetabo(mzMLfile)
@@ -183,5 +177,15 @@ if __name__=="__main__":
     match_xcms = ground_truths.copy()
     match_features(match_xcms, df_xcms)
     match_xcms.detected.value_counts()
+    
+    tic()
+    parser=mzXMLParser()
+    lcms = parser.parseFile(mzfile.encode(sys.getfilesystemencoding()))
+    pics_c = pm.FPICs(lcms, 10.0, 200.0, 0.5)
+    toc()
+    match_fpic = ground_truths.copy()
+    df_fpic = pics2df(pics_c)
+    match_features(match_fpic, df_fpic)
+    match_fpic.detected.value_counts()
 
     
