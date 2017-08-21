@@ -12,6 +12,8 @@ import pandas as pd
 from FPIC import data2mzxml, tic, toc
 from _pymass import mzXMLParser
 import _pymass as pm
+import numpy as np
+
 
 def simulation(fasta, contaminants, out, out_cntm,
                simulator = 'C:/Program Files/OpenMS/bin/MSSimulator.exe'):   
@@ -159,17 +161,27 @@ if __name__=="__main__":
     pics_c = pm.FPICs(lcms, 10.0, 200.0, 0.5)
     toc()
     
-    ground_truths1 = ground_truths.copy()
-    match_features(ground_truths1, pics2df(pics_c))
-    ground_truths1.detected.value_counts()
+    match_fpic = ground_truths.copy()
+    match_features(match_fpic, pics2df(pics_c))
+    match_fpic.detected.value_counts()
     
     tic()
     feature_map = FeatureFindingMetabo(mzMLfile)
     df_ffm = parse_featureXML_FFM(feature_map)
     toc()
     
-    ground_truths2 = ground_truths.copy()
-    match_features(ground_truths2, df_ffm)
-    ground_truths2.detected.value_counts()
+    match_ffm = ground_truths.copy()
+    match_features(match_ffm, df_ffm)
+    match_ffm.detected.value_counts()
     
     params = params2df(pyopenms.FeatureFindingMetabo().getDefaults())
+    
+    from r_functions import XCMS
+    tic()
+    df_xcms = XCMS(mzMLfile)
+    toc()
+    match_xcms = ground_truths.copy()
+    match_features(match_xcms, df_xcms)
+    match_xcms.detected.value_counts()
+
+    
