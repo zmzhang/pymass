@@ -123,6 +123,15 @@ def pics2df(pics):
         df.loc[len(df)] = [rt, mz, intensity] 
     return df
 
+def peaks2df(peaks):
+    df = pd.DataFrame(columns=['rt', 'mz', 'intensity'])
+    for i in range(peaks.shape[0]):
+        rt  = peaks[i,3]
+        mz  =peaks[i,0]
+        intensity = peaks[i,6]
+        df.loc[len(df)] = [rt, mz, intensity] 
+    return df
+
 def match_features(ground_truths, df):
     for i in range(len(df)):
         rt  = df.at[i, 'rt']
@@ -187,5 +196,10 @@ if __name__=="__main__":
     df_fpic = pics2df(pics_c)
     match_features(match_fpic, df_fpic)
     match_fpic.detected.value_counts()
-
+    
+    from FPIC import pics2peaks, merge_peaks
+    df_fpic_merge = peaks2df(merge_peaks(pics2peaks(pics_c), 0.02, 5))
+    match_fpic_merge = ground_truths.copy()
+    match_features(match_fpic_merge, df_fpic_merge)
+    match_fpic_merge.detected.value_counts()
     
