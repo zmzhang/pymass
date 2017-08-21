@@ -9,7 +9,7 @@ Created on Wed Aug 16 08:14:15 2017
 import subprocess, sys, os
 import pyopenms
 import pandas as pd
-from FPIC import data2mzxml
+from FPIC import data2mzxml, tic, toc
 from _pymass import mzXMLParser
 import _pymass as pm
 
@@ -71,7 +71,7 @@ def FeatureFindingMetabo(mzfile):
     subprocess.call([finder, '-in', mzfile, '-out', feature_file, 
                '-algorithm:common:noise_threshold_int', '10',
                '-algorithm:common:chrom_peak_snr', '3',
-               '-algorithm:common:chrom_fwhm', '5',
+               '-algorithm:common:chrom_fwhm', '10',
                '-algorithm:mtd:mass_error_ppm', '20',
                '-algorithm:mtd:reestimate_mt_sd', 'true',
                '-algorithm:epd:width_filtering', 'off'])  
@@ -153,16 +153,20 @@ if __name__=="__main__":
     mzfile =  "MM48_MSS.mzxml"
     mzMLfile =  "MM48_MSS.mzML"
 
+    tic()
     parser=mzXMLParser()
     lcms = parser.parseFile(mzfile.encode(sys.getfilesystemencoding()))
     pics_c = pm.FPICs(lcms, 10.0, 200.0, 0.5)
+    toc()
     
     ground_truths1 = ground_truths.copy()
     match_features(ground_truths1, pics2df(pics_c))
     ground_truths1.detected.value_counts()
     
+    tic()
     feature_map = FeatureFindingMetabo(mzMLfile)
     df_ffm = parse_featureXML_FFM(feature_map)
+    toc()
     
     ground_truths2 = ground_truths.copy()
     match_features(ground_truths2, df_ffm)
