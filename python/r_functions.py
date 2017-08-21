@@ -9,6 +9,11 @@ import rpy2.robjects.numpy2ri as numpy2ri
 import os
 
 def init_r():
+    """
+        1. Install R 3.4.1 with conda
+        2. Install XCMS and PITracer in R
+        3. Install rpy2 in with conda
+    """
     numpy2ri.activate()
     wd = os.path.dirname(os.path.abspath(__file__)).replace('\\','/')
     robjects.r(f'''setwd(\'{wd}\')''')
