@@ -20,7 +20,7 @@ In future, more file formats will be supported and more methods will be implemen
 * [CMake 3.7.1](https://cmake.org/files/v3.7/cmake-3.7.1-win64-x64.msi)
 * [Eigen 3.3.3](http://bitbucket.org/eigen/eigen/get/3.3.3.zip) 
 * [Threading Building Blocks 2017 Update 6](https://github.com/01org/tbb/releases/download/2017_U6/tbb2017_20170412oss_win.zip)
-* [expat](https://github.com/zerotao/expat.git)
+* [libexpat 2.2.4](https://github.com/libexpat/libexpat/archive/R_2_2_4.tar.gz)
 * [base64SIMD](https://github.com/aklomp/base64.git)
 
 ## Download
