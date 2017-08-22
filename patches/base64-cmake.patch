@@ -1,0 +1,22 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 1fdfe78..a470c33 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -57,7 +57,7 @@ endif()
+ # OpenMP
+ find_package(OpenMP)
+ if (OPENMP_FOUND)
+-    option(BASE64_USE_OpenMP "Utilize OpenMP to parallelize encoding and decoding." ON)
++    option(BASE64_USE_OpenMP "Utilize OpenMP to parallelize encoding and decoding." OFF)
+ endif()
+ 
+ 
+@@ -80,7 +80,7 @@ endif()
+ 
+ ########################################################################
+ # library project
+-add_library(base64 STATIC
++add_library(base64 SHARED
+     # library files
+     lib/lib.c
+     lib/codec_choose.c
