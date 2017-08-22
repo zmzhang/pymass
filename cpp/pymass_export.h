@@ -9,10 +9,18 @@
 #  ifndef PYMASS_EXPORT
 #    ifdef pymass_EXPORTS
         /* We are building this library */
-#      define PYMASS_EXPORT __declspec(dllexport)
+#      ifdef _MSC_VER
+#      		define PYMASS_EXPORT __declspec(dllexport)
+#      else
+#			define PYMASS_EXPORT
+#      endif
 #    else
         /* We are using this library */
+#      ifdef _MSC_VER
 #      define PYMASS_EXPORT __declspec(dllimport)
+#      else
+#			define PYMASS_EXPORT
+#      endif
 #    endif
 #  endif
 

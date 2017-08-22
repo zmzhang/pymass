@@ -33,7 +33,7 @@ include_directories("${BASE64_ABS_PATH}/include")
 link_directories("${BASE64_ABS_PATH}/lib")
 
 # find tbb
-find_package(tbb) 
+find_package(TBB) 
 
 
 find_package(OpenMP)
@@ -42,7 +42,12 @@ if (OPENMP_FOUND)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
 
-add_definitions(-DUNICODE -D_UNICODE -D_CRT_SECURE_NO_DEPRECATE /wd4251 /wd4819 /wd4244)
+
+if(MSVC)
+	add_definitions(-DUNICODE -D_UNICODE -D_CRT_SECURE_NO_DEPRECATE /wd4251 /wd4819 /wd4244)
+else()
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -mavx2")
+endif()
 
 
 include_directories(cpp)
