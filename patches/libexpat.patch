@@ -1,0 +1,13 @@
+diff --git a/expat/lib/xmlparse.c b/expat/lib/xmlparse.c
+index 0df6883..563af69 100644
+--- a/expat/lib/xmlparse.c
++++ b/expat/lib/xmlparse.c
+@@ -3080,7 +3080,7 @@ doContent(XML_Parser parser,
+         return XML_ERROR_NONE;
+       }
+       if (characterDataHandler) {
+-        if (MUST_CONVERT(enc, s)) {
++        if (MUST_CONVERT(enc, s) && 0) {
+           ICHAR *dataPtr = (ICHAR *)dataBuf;
+           XmlConvert(enc, &s, end, &dataPtr, (ICHAR *)dataBufEnd);
+           characterDataHandler(handlerArg, dataBuf,
