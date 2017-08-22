@@ -49,7 +49,7 @@ def parse_featureXML_GT(feature_file):
 
 def FeatureFindingMetabo1(mzfile):
     exp = pyopenms.MSExperiment()
-    pyopenms.MzXMLFile().load(mzfile, exp)
+    pyopenms.MzMLFile().load(mzfile, exp)
     
     mtd_params = pyopenms.MassTraceDetection().getDefaults()
     mtd = pyopenms.MassTraceDetection()
@@ -74,12 +74,16 @@ def FeatureFindingMetabo(mzfile):
     finder = 'C:/Program Files/OpenMS/bin/FeatureFinderMetabo.exe'
     feature_file = 'tmp.featureXML'
     subprocess.call([finder, '-in', mzfile, '-out', feature_file, 
-               '-algorithm:common:noise_threshold_int', '10',
+               '-algorithm:common:noise_threshold_int', '5',
                '-algorithm:common:chrom_peak_snr', '3',
                '-algorithm:common:chrom_fwhm', '10',
                '-algorithm:mtd:mass_error_ppm', '20',
                '-algorithm:mtd:reestimate_mt_sd', 'true',
-               '-algorithm:epd:width_filtering', 'off'])  
+               '-algorithm:mtd:min_sample_rate', '0',
+               '-algorithm:mtd:min_trace_length', '2',
+               '-algorithm:epd:width_filtering', 'off',
+               '-algorithm:ffm:charge_lower_bound', '1',
+               '-algorithm:ffm:charge_lower_bound', '5'])  
     featuremap = pyopenms.FeatureMap()
     featurexml = pyopenms.FeatureXMLFile()
     featurexml.load(feature_file, featuremap)
@@ -190,7 +194,7 @@ if __name__=="__main__":
     tic()
     parser=mzXMLParser()
     lcms = parser.parseFile(mzfile.encode(sys.getfilesystemencoding()))
-    pics_c = pm.FPICs(lcms, 10.0, 200.0, 0.5)
+    pics_c = pm.FPICs(lcms, 5.0, 200.0, 0.5)
     toc()
     match_fpic = ground_truths.copy()
     df_fpic = pics2df(pics_c)
