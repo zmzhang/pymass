@@ -7,9 +7,11 @@ wget https://github.com/01org/tbb/releases/download/2017_U6/tbb2017_20170412oss_
 tar xzvf tbb2017_20170412oss_lin.tgz
 mv tbb2017_20170412oss tbb
 
+
 git clone git@github.com:BurningEnlightenment/base64-cmake.git && cd base64-cmake
 git checkout 8a11f9275db2d24f1db6c8ea6b2774b1040cef82
-wget 
+wget https://raw.githubusercontent.com/zmzhang/pymass/master/patches/base64-cmake.patch
+git apply base64-cmake.patch
 mkdir build && cd build
 cmake .. -DCMAKE_INSTALL_PREFIX=../../base64SIMD && make
 make install
