@@ -36,8 +36,12 @@ pip install numpy
 
 git clone git@github.com:zmzhang/pymass.git && cd pymass
 mkdir build && cd build
-cmake .. && make
+cmake .. && make && make install
+cd .. && cd ..
 
+sudo cp thirdparty/expat/lib/libexpat.so pymass/python
+sudo cp thirdparty/base64SIMD/lib/libbase64.so pymass/python
+sudo cp thirdparty/tbb/lib/intel64/gcc4.7/libtbb.so.2 pymass/python
 
 
 
