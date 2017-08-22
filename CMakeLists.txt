@@ -7,7 +7,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}  "../thirdparty/eigen")
 set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}  "../thirdparty/expat")
-set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}  "../thirdparty/boost")
 set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}  "../thirdparty/tbb")
 
 # find eigen library
