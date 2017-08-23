@@ -1,4 +1,4 @@
-mkdir thirdparty && cd thirdparty
+mkdir -p thirdparty && cd thirdparty
 
 git clone git@github.com:RLovelett/eigen.git && cd eigen
 git checkout tags/3.3.3 && cd ..
@@ -12,7 +12,7 @@ git clone git@github.com:BurningEnlightenment/base64-cmake.git && cd base64-cmak
 git checkout 8a11f9275db2d24f1db6c8ea6b2774b1040cef82
 wget https://raw.githubusercontent.com/zmzhang/pymass/master/patches/base64-cmake.patch
 git apply base64-cmake.patch
-mkdir build && cd build
+mkdir -p build && cd build
 cmake .. -DCMAKE_INSTALL_PREFIX=../../base64SIMD && make
 make install
 cd .. && cd ..
@@ -22,7 +22,7 @@ cd libexpat
 git checkout tags/R_2_2_4
 wget https://raw.githubusercontent.com/zmzhang/pymass/master/patches/libexpat.patch
 git apply libexpat.patch
-mkdir build && cd build
+mkdir -p build && cd build
 cmake ../expat -DCMAKE_INSTALL_PREFIX=../../expat && make && make install
 cd .. && cd .. && cd ..
 
@@ -35,7 +35,7 @@ pip install numpy
 
 
 git clone git@github.com:zmzhang/pymass.git && cd pymass
-mkdir build && cd build
+mkdir -p build && cd build
 cmake .. && make && make install
 cd .. && cd ..
 
