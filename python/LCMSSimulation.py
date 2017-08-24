@@ -108,15 +108,6 @@ def parse_featureXML_FFM(featuremap):
     return df
 
 
-def params2df(params):
-    params_df = pd.DataFrame(columns=['name', 'value'])
-    for k, v in sorted(params.items()):
-        if type(v) == type(bytes()):
-            v = v.decode('utf-8')
-        params_df.loc[len(params_df)] = [k.decode('utf-8'),v]
-    return params_df
-
-
 def pics2df(pics):
     df = pd.DataFrame(columns=['rt', 'mz', 'intensity'])
     for i,pic in enumerate(pics):
@@ -180,9 +171,7 @@ if __name__=="__main__":
     match_ffm = ground_truths.copy()
     match_features(match_ffm, df_ffm)
     match_ffm.detected.value_counts()
-    
-    params = params2df(pyopenms.FeatureFindingMetabo().getDefaults())
-    
+       
     from r_functions import XCMS
     tic()
     df_xcms = XCMS(mzMLfile)
