@@ -15,7 +15,7 @@ import _pymass as pm
 import numpy as np
 
 
-def simulation(fasta, contaminants, out, out_cntm,
+def simulation(fasta, contaminants, out, out_cntm, stddev,
                simulator = 'C:/Program Files/OpenMS/bin/MSSimulator.exe'):   
     """
         Should copy "C:\Program Files\OpenMS\share\OpenMS\examples" to working directory of Python
@@ -23,7 +23,7 @@ def simulation(fasta, contaminants, out, out_cntm,
    
     subprocess.call([simulator, '-in', fasta, '-out', out, '-out_cntm',out_cntm, 
                '-algorithm:MSSim:RawSignal:contaminants:file', contaminants,
-               '-algorithm:MSSim:RawSignal:noise:detector:stddev', '1',
+               '-algorithm:MSSim:RawSignal:noise:detector:stddev', f'{stddev}',
                '-algorithm:MSSim:RawSignal:resolution:value', '5000',
                '-algorithm:MSSim:RawSignal:resolution:type', 'constant',
                '-algorithm:MSSim:Ionization:mz:lower_measurement_limit', '10',
@@ -70,12 +70,13 @@ def FeatureFindingMetabo1(mzfile):
     ffm.run(splitted_mass_traces, feature_map)
     return feature_map
 
-def FeatureFindingMetabo(mzfile):
+def FeatureFindingMetabo(mzfile, noise_threshold_int, snr):
     finder = 'C:/Program Files/OpenMS/bin/FeatureFinderMetabo.exe'
     feature_file = 'tmp.featureXML'
+    noise_threshold_int = noise_threshold_int / snr
     subprocess.call([finder, '-in', mzfile, '-out', feature_file, 
-               '-algorithm:common:noise_threshold_int', '5',
-               '-algorithm:common:chrom_peak_snr', '3',
+               '-algorithm:common:noise_threshold_int', f'{noise_threshold_int}',
+               '-algorithm:common:chrom_peak_snr', f'{snr}',
                '-algorithm:common:chrom_fwhm', '10',
                '-algorithm:mtd:mass_error_ppm', '20',
                '-algorithm:mtd:reestimate_mt_sd', 'true',
@@ -147,24 +148,27 @@ if __name__=="__main__":
     mm48 = mm48_all[['Name', 'Formel','RT','RT2','Intensity','charge','shape','source']]
     mm48.to_csv('simulation/MM48_MSSimulator.csv', header=False, index=False)
     
+    
+    parameters = [[0, 1],[1, 10], [3,30], [5, 50], [10, 100],  [12, 120], [15, 150], [20, 200]]
+    
     simulation('simulation/test.fasta','simulation/MM48_MSSimulator.csv',
-               'MM48_MSS_Profile.mzML', 'MM48_MSS.featureXML' )
-    
-    
+               'MM48_MSS_Profile.mzML', 'MM48_MSS.featureXML', parameters[i][0]) 
     peak_picker = 'C:/Program Files/OpenMS/bin/PeakPickerHiRes.exe'
     subprocess.call([peak_picker,'-in', 'MM48_MSS_Profile.mzML',
                     '-out', 'MM48_MSS.mzML'])
-    
     data2mzxml('MM48_MSS.mzML')
-    
     ground_truths = parse_featureXML_GT('MM48_MSS.featureXML')
+    
+    
     
     mzfile =  "MM48_MSS.mzxml"
     mzMLfile =  "MM48_MSS.mzML"
+    
+    
 
     
     tic()
-    feature_map = FeatureFindingMetabo(mzMLfile)
+    feature_map = FeatureFindingMetabo(mzMLfile, parameters[i][1], 3)
     df_ffm = parse_featureXML_FFM(feature_map)
     toc()
     
@@ -174,7 +178,7 @@ if __name__=="__main__":
        
     from r_functions import XCMS
     tic()
-    df_xcms = XCMS(mzMLfile, w1=5, w2=12, snr=3, intensity=10)
+    df_xcms = XCMS(mzMLfile, w1=5, w2=50, snr=3, intensity=parameters[i][1])
     toc()
     match_xcms = ground_truths.copy()
     match_features(match_xcms, df_xcms)
@@ -183,7 +187,7 @@ if __name__=="__main__":
     tic()
     parser=mzXMLParser()
     lcms = parser.parseFile(mzfile.encode(sys.getfilesystemencoding()))
-    pics_c = pm.FPICs(lcms, 5.0, 200.0, 0.5)
+    pics_c = pm.FPICs(lcms, parameters[i][1], 200.0, 0.5)
     toc()
     match_fpic = ground_truths.copy()
     df_fpic = pics2df(pics_c)
@@ -191,7 +195,7 @@ if __name__=="__main__":
     match_fpic.detected.value_counts()
     
     from FPIC import pics2peaks, merge_peaks
-    df_fpic_merge = peaks2df(merge_peaks(pics2peaks(pics_c), 0.02, 5))
+    df_fpic_merge = peaks2df(merge_peaks(pics2peaks(pics_c), 0.02, 10))
     match_fpic_merge = ground_truths.copy()
     match_features(match_fpic_merge, df_fpic_merge)
     match_fpic_merge.detected.value_counts()
