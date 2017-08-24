@@ -61,6 +61,17 @@ def data2mzxml(path, converter = 'C:/Program Files/OpenMS/bin/FileConverter.exe'
             file_out = path + f[0:-4] + "mzxml"
             subprocess.call([converter, '-in', file_in, '-out', file_out])  
 
+def data2mzml(path, converter = 'C:/Program Files/OpenMS/bin/FileConverter.exe'):
+    if os.path.isfile(path):
+        files = [path]
+        path = ""
+    elif os.path.isdir(path):
+        files=os.listdir(path)
+    for f in files:
+        if f.lower().endswith(".mzxml"):
+            file_in  = path + f
+            file_out = path + f[0:-5] + "mzml"
+            subprocess.call([converter, '-in', file_in, '-out', file_out]) 
 
 def pics_id(pics, n):
     pic_ids=[]
