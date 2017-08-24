@@ -1,10 +1,10 @@
-PIT <- function(mzXMLFile){
+PIT <- function(mzXMLFile, maxGap,CalibrationTolerance, plen, intensity){
   library(PITracer)
   PIC = findPureIonChromatogram(
     mzXMLFile,
-    maxGap = 5,
+    maxGap = maxGap,
     RangeEstimatedPPMTolerance=c(5, 50),
-    MaxMassCalibrationTolerance=100,        #numeric or NA (NA: without calibration)
+    MaxMassCalibrationTolerance=CalibrationTolerance,        #numeric or NA (NA: without calibration)
     SaturatedIntensity=Inf,
     SaturatedPPM=20)
 
@@ -22,14 +22,15 @@ PIT <- function(mzXMLFile){
   colnames(ChromInfo) = c("mz", "mzmin", "mzmax", "sc", "scmin", "scmax", "intensity", "length")
 
 
-  ChromInfo_refine = ChromInfo[ChromInfo[,"length"] >= 10 & ChromInfo[,"intensity"]>300,]
+  ChromInfo_refine = ChromInfo[ChromInfo[,"length"] >= plen & ChromInfo[,"intensity"]>intensity,]
 
   return(ChromInfo_refine)
 }
 
 
-XC <- function(mzXMLFile){
+XC <- function(mzXMLFile, w1, w2, snr, intensity){
   library(xcms)
-  xset <- xcmsSet(mzXMLFile)
-  return(xset@peaks[,c(1,2,3,4,5,6,9)])
+  xraw <- xcmsRaw(mzXMLFile)
+  peaks = findPeaks.centWave(xraw, peakwidth=c(w1,w2), snthresh=snr, prefilter=c(1,intensity))
+  return(peaks[,c(1,2,3,4,5,6,9)])
 }
