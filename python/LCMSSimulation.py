@@ -174,7 +174,7 @@ if __name__=="__main__":
        
     from r_functions import XCMS
     tic()
-    df_xcms = XCMS(mzMLfile)
+    df_xcms = XCMS(mzMLfile, w1=5, w2=12, snr=3, intensity=10)
     toc()
     match_xcms = ground_truths.copy()
     match_features(match_xcms, df_xcms)

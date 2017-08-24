@@ -24,10 +24,10 @@ def init_r():
     XC = robjects.globalenv['XC']
     return PIT, XC
 
-def XCMS(mzMLFile):
+def XCMS(mzMLFile, w1, w2, snr, intensity):
     df = pd.DataFrame(columns=['rt', 'mz', 'intensity'])
     _,XC = init_r()
-    peaks_xcms = np.array(XC(mzXMLFile=mzMLFile))
+    peaks_xcms = np.array(XC(mzXMLFile=mzMLFile, w1=w1, w2=w2, snr=snr, intensity=intensity))
     for i in range(peaks_xcms.shape[0]):
         rt  = peaks_xcms[i,3]
         mz  = peaks_xcms[i,0]
