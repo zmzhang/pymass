@@ -139,6 +139,12 @@ def match_features(ground_truths, df):
                 ground_truths.at[j, 'detected'] = True
                 ground_truths.at[j, 'pic_id'] = i
 
+def metrics(TP, FN, FP):
+    r = TP/(TP+FN)
+    p = TP/(TP+FP)
+    f1 = (2*r*p)/(r+p)
+    return r, p, f1
+
 
 if __name__=="__main__":
     mm48_all = pd.read_csv('simulation/MM48_annotations.csv')
@@ -148,55 +154,69 @@ if __name__=="__main__":
     mm48 = mm48_all[['Name', 'Formel','RT','RT2','Intensity','charge','shape','source']]
     mm48.to_csv('simulation/MM48_MSSimulator.csv', header=False, index=False)
     
-    
+    names = ['stddev','FFM_Recall', 'FFM_Precision', 'FFM_FScore',
+             'XCMS_Recall', 'XCMS_Precision', 'XCMS_FScore',
+             'FPIC_Recall', 'FPIC_Precision', 'FPIC_FScore']
+    results = pd.DataFrame(columns=names) 
     parameters = [[0, 1],[1, 10], [3,30], [5, 50], [10, 100],  [12, 120], [15, 150], [20, 200]]
     
-    simulation('simulation/test.fasta','simulation/MM48_MSSimulator.csv',
-               'MM48_MSS_Profile.mzML', 'MM48_MSS.featureXML', parameters[i][0]) 
-    peak_picker = 'C:/Program Files/OpenMS/bin/PeakPickerHiRes.exe'
-    subprocess.call([peak_picker,'-in', 'MM48_MSS_Profile.mzML',
-                    '-out', 'MM48_MSS.mzML'])
-    data2mzxml('MM48_MSS.mzML')
-    ground_truths = parse_featureXML_GT('MM48_MSS.featureXML')
     
+    for i,p in enumerate(parameters):
     
+        simulation('simulation/test.fasta','simulation/MM48_MSSimulator.csv',
+                   'MM48_MSS_Profile.mzML', 'MM48_MSS.featureXML', p[0]) 
+        peak_picker = 'C:/Program Files/OpenMS/bin/PeakPickerHiRes.exe'
+        subprocess.call([peak_picker,'-in', 'MM48_MSS_Profile.mzML',
+                        '-out', 'MM48_MSS.mzML'])
+        data2mzxml('MM48_MSS.mzML')
+        ground_truths = parse_featureXML_GT('MM48_MSS.featureXML')
+        
+        
+        
+        mzfile =  "MM48_MSS.mzxml"
+        mzMLfile =  "MM48_MSS.mzML"
+        
+        
     
-    mzfile =  "MM48_MSS.mzxml"
-    mzMLfile =  "MM48_MSS.mzML"
-    
-    
-
-    
-    tic()
-    feature_map = FeatureFindingMetabo(mzMLfile, parameters[i][1], 3)
-    df_ffm = parse_featureXML_FFM(feature_map)
-    toc()
-    
-    match_ffm = ground_truths.copy()
-    match_features(match_ffm, df_ffm)
-    match_ffm.detected.value_counts()
-       
-    from r_functions import XCMS
-    tic()
-    df_xcms = XCMS(mzMLfile, w1=5, w2=50, snr=3, intensity=parameters[i][1])
-    toc()
-    match_xcms = ground_truths.copy()
-    match_features(match_xcms, df_xcms)
-    match_xcms.detected.value_counts()
-    
-    tic()
-    parser=mzXMLParser()
-    lcms = parser.parseFile(mzfile.encode(sys.getfilesystemencoding()))
-    pics_c = pm.FPICs(lcms, parameters[i][1], 200.0, 0.5)
-    toc()
-    match_fpic = ground_truths.copy()
-    df_fpic = pics2df(pics_c)
-    match_features(match_fpic, df_fpic)
-    match_fpic.detected.value_counts()
-    
-    from FPIC import pics2peaks, merge_peaks
-    df_fpic_merge = peaks2df(merge_peaks(pics2peaks(pics_c), 0.02, 10))
-    match_fpic_merge = ground_truths.copy()
-    match_features(match_fpic_merge, df_fpic_merge)
-    match_fpic_merge.detected.value_counts()
-    
+        
+        tic()
+        feature_map = FeatureFindingMetabo(mzMLfile, p[1], 3)
+        df_ffm = parse_featureXML_FFM(feature_map)
+        toc()
+        
+        match_ffm = ground_truths.copy()
+        match_features(match_ffm, df_ffm)
+        m = match_ffm.detected.value_counts().values
+           
+        from r_functions import XCMS
+        tic()
+        df_xcms = XCMS(mzMLfile, w1=5, w2=50, snr=3, intensity=p[1])
+        toc()
+        match_xcms = ground_truths.copy()
+        match_features(match_xcms, df_xcms)
+        x = match_xcms.detected.value_counts().values
+        
+        tic()
+        parser=mzXMLParser()
+        lcms = parser.parseFile(mzfile.encode(sys.getfilesystemencoding()))
+        pics_c = pm.FPICs(lcms, p[1], 200.0, 0.5)
+        toc()
+        match_fpic = ground_truths.copy()
+        df_fpic = pics2df(pics_c)
+        match_features(match_fpic, df_fpic)
+        match_fpic.detected.value_counts()
+        
+        from FPIC import pics2peaks, merge_peaks
+        df_fpic_merge = peaks2df(merge_peaks(pics2peaks(pics_c), 0.02, 10))
+        match_fpic_merge = ground_truths.copy()
+        match_features(match_fpic_merge, df_fpic_merge)
+        f = match_fpic_merge.detected.value_counts().values
+        
+        m_r, m_p,m_f = metrics(m[0], m[1], df_ffm.shape[0]-m[0])
+        x_r, x_p,x_f = metrics(x[0], x[1], df_xcms.shape[0]-x[0])
+        f_r, f_p,f_f = metrics(f[0], f[1], df_fpic_merge.shape[0]-f[0])
+        
+        
+        results.loc[len(results)] = [p[0],m_r, m_p,m_f,x_r, x_p,x_f,f_r, f_p,f_f] 
+        
+        
