@@ -10,6 +10,7 @@ from rdkit.Chem.rdMolDescriptors import CalcMolFormula, CalcExactMolWt
 from rdkit.Chem.rdmolops import GetFormalCharge
 import gzip
 from collections import Counter
+import json, glob, os
 
 def filter_pubchem(ms):
     ms_filtered = []
@@ -37,8 +38,21 @@ def filter_pubchem(ms):
                 ms_filtered.append(CalcMolFormula(m))
     return ms_filtered
 
+def write_json(ms, fname):
+    f = open(fname, 'w')
+    json.dump(ms, f)
+    f.close()
 
-inf = gzip.open('F:/resources/isotope/pubchem/ftp.ncbi.nlm.nih.gov/pubchem/Compound/Monthly/2016-12-01/SDF/Compound_000000001_000025000.sdf.gz')
-gzsuppl = Chem.ForwardSDMolSupplier(inf)
-ms = [Chem.AddHs(x) for x in gzsuppl if x is not None]
-ms_filtered = filter_pubchem(ms)
+
+sdf_path = 'F:/resources/isotope/pubchem/ftp.ncbi.nlm.nih.gov/pubchem/Compound/Monthly/2016-12-01/SDF/'
+sdfs =  glob.glob(sdf_path + '*.sdf.gz')
+for i, sdf in enumerate(sdfs):
+    print( '{:2.4f}%  {}'.format((100 * float(i)/len(sdfs)), sdf))
+    if not(os.path.exists(sdf[0:-6]+'json')):
+        sdf_gz = gzip.open(sdf)
+        gzsuppl = Chem.ForwardSDMolSupplier(sdf_gz)
+        ms = [Chem.AddHs(x) for x in gzsuppl if x is not None]
+        ms_filtered = filter_pubchem(ms)
+        write_json(ms_filtered, sdf[0:-6]+'json')
+
+
