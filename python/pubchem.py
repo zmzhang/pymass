@@ -11,6 +11,7 @@ from rdkit.Chem.rdmolops import GetFormalCharge
 import gzip
 from collections import Counter
 import json, glob, os
+from pathos.multiprocessing import ProcessingPool
 
 def filter_pubchem(ms):
     ms_filtered = []
@@ -43,11 +44,8 @@ def write_json(ms, fname):
     json.dump(ms, f)
     f.close()
 
-
-sdf_path = 'F:/resources/isotope/pubchem/ftp.ncbi.nlm.nih.gov/pubchem/Compound/Monthly/2016-12-01/SDF/'
-sdfs =  glob.glob(sdf_path + '*.sdf.gz')
-for i, sdf in enumerate(sdfs):
-    print( '{:2.4f}%  {}'.format((100 * float(i)/len(sdfs)), sdf))
+def process_sdf(sdf, i, total):
+    print( '{:2.4f}%  {}'.format((100 * float(i)/total), sdf))    
     if not(os.path.exists(sdf[0:-6]+'json')):
         sdf_gz = gzip.open(sdf)
         gzsuppl = Chem.ForwardSDMolSupplier(sdf_gz)
@@ -55,4 +53,9 @@ for i, sdf in enumerate(sdfs):
         ms_filtered = filter_pubchem(ms)
         write_json(ms_filtered, sdf[0:-6]+'json')
 
+if __name__ == '__main__':
+    sdf_path = 'F:/resources/isotope/pubchem/ftp.ncbi.nlm.nih.gov/pubchem/Compound/Monthly/2016-12-01/SDF/'
+    sdfs =  glob.glob(sdf_path + '*.sdf.gz')
+    pool = ProcessingPool(os.cpu_count())
+    pool.map(process_sdf, sdfs, range(len(sdfs)), [len(sdfs)]*len(sdfs)) 
 
