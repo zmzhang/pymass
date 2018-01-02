@@ -10,7 +10,7 @@ from rdkit.Chem.rdMolDescriptors import CalcMolFormula, CalcExactMolWt
 from rdkit.Chem.rdmolops import GetFormalCharge
 import gzip
 from collections import Counter
-import json, glob, os
+import json, glob, os, itertools
 from pathos.multiprocessing import ProcessingPool
 
 def filter_pubchem(ms):
@@ -53,9 +53,23 @@ def process_sdf(sdf, i, total):
         ms_filtered = filter_pubchem(ms)
         write_json(ms_filtered, sdf[0:-6]+'json')
 
+def load_jsons(json_path):
+    mols = []
+    jsons =  glob.glob(sdf_path + '*.json')
+    for i, json_file in enumerate(jsons):
+        print( '{:2.4f}%'.format((100 * float(i)/len(jsons))))  
+        f = open(json_file)
+        mol = json.load(f)
+        f.close()
+        mols.append(mol)
+    return list(itertools.chain(*mols))
+    
+
 if __name__ == '__main__':
     sdf_path = 'F:/resources/isotope/pubchem/ftp.ncbi.nlm.nih.gov/pubchem/Compound/Monthly/2016-12-01/SDF/'
-    sdfs =  glob.glob(sdf_path + '*.sdf.gz')
-    pool = ProcessingPool(os.cpu_count())
-    pool.map(process_sdf, sdfs, range(len(sdfs)), [len(sdfs)]*len(sdfs)) 
+#    sdfs =  glob.glob(sdf_path + '*.sdf.gz')
+#    pool = ProcessingPool(os.cpu_count())
+#    pool.map(process_sdf, sdfs, range(len(sdfs)), [len(sdfs)]*len(sdfs)) 
+    mols = load_jsons(sdf_path)
+    
 
