@@ -71,5 +71,6 @@ if __name__ == '__main__':
 #    pool = ProcessingPool(os.cpu_count())
 #    pool.map(process_sdf, sdfs, range(len(sdfs)), [len(sdfs)]*len(sdfs)) 
     mols = load_jsons(sdf_path)
+    mols_rd = list(set(mols))
     
 
