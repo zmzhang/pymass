@@ -13,6 +13,10 @@ from collections import Counter
 import json, glob, os, itertools
 from pathos.multiprocessing import ProcessingPool
 
+from IsoSpecPy import IsoThreshold
+from pylab import vlines
+import numpy as np
+
 def filter_pubchem(ms):
     ms_filtered = []
     elements = set(['C', 'H', 'O', 'N', 'S', 'P', 'Cl', 'B','Br','Se'])
@@ -73,4 +77,15 @@ if __name__ == '__main__':
     mols = load_jsons(sdf_path)
     mols_rd = list(set(mols))
     
+
+
+    iso = IsoThreshold(formula="C254H377N65O75S6")
+    mass = np.array([i for i in iso.masses])
+    probs = np.array([i for i in iso.probs])
+    idx = np.argsort(probs)[::-1]
+    
+    for i in idx[0:10]:
+        print(mass[i], "\t", probs[i])
+    
+    vlines(mass, np.zeros(probs.shape), probs)
 
