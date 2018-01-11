@@ -14,6 +14,9 @@ In future, more file formats will be supported and more methods will be implemen
 
 ## Required Dependencies
 
+* Hardware
+	* [Modern CPUs](https://en.wikipedia.org/wiki/Advanced_Vector_Extensions#CPUs_with_AVX2) with Advanced Vector Extensions 2(AVX2) instructions 
+
 * Windows:
 	* [Visual Studio Community 2015 with Update 3](http://download.microsoft.com/download/b/e/d/bedddfc4-55f4-4748-90a8-ffe38a40e89f/vs2015.3.com_enu.iso)
 	* [Anaconda Python 3.6.0 64bit](https://repo.continuum.io/archive/Anaconda3-4.3.1-Windows-x86_64.exe)
